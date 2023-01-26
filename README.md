@@ -1,2 +1,2 @@
 # These-Rehablocks
-Reposetory for my phd project 
+Repository for my phd project 
