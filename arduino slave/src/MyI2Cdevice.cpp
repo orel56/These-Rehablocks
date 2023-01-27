@@ -4,8 +4,9 @@
  */
 
 #include "MyI2Cdevice.h"
+#include "config.h"
 
-char*mycommands[3]={strdup("connexion"),strdup("change_addr"),strdup("get_value")};
+char*mycommands[6]={strdup("connexion"),strdup("change_addr"),strdup("get_value"),strdup("green_led"),strdup("red_led"),strdup("get_type")};
 
 uint16_t hex_val;
 
@@ -23,22 +24,20 @@ SlaveResponse MyI2CPeripheral::getResponse(int val){
        response.size=2;
        return response;
     }
-    else if (strcmp(command,"connexion")==0){
+    else if (strcmp(command,"get_type")==0){
+
+      response.buffer[0]=(uint8_t) Block_type;
+      response.size =1;
+      return response;
+
+    }
+    else {
        response.buffer[0]= 0x01;
 
        response.size=1;
        return response;
     }
-    else if (strcmp(command,"change_addr")==0){
-       response.buffer[0]= 0x02;
-
-       response.size=1;
-       return response;
-    }
-
   
-    return response;
-
 };
 
 uint8_t MyI2CPeripheral::expectedReceiveLength(uint8_t forRegister){
@@ -54,11 +53,19 @@ void MyI2CPeripheral::process(volatile uint8_t * buffer, uint8_t len){
    if (strcmp(command,"change_addr")==0){
       TWAR = buffer[1] << 1;
     }
+   else if (strcmp(command,"green_led")==0){
+    digitalWrite(RED_LED,LOW);
+    digitalWrite(LED_BUILTIN,HIGH);
+   }
+   else if (strcmp(command,"red_led")==0){
+    digitalWrite(RED_LED,HIGH);
+    digitalWrite(LED_BUILTIN,LOW);
+   }
     
 };
 
 void MyI2CPeripheral::doThings(int* val){
-  *val = analogRead(A0);
+    *val = analogRead(A0);
 };
 
 MyI2CPeripheral::MyI2CPeripheral(){};

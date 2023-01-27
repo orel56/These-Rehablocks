@@ -22,7 +22,6 @@ int val=0;
 void i2cRequestEvent()
 {
    // get the response (the I2CDevice knows what to say)
-   Serial.println("request");
    SlaveResponse resp = I2CDevice.getResponse(val);
    uint8_t buf[2]={resp.buffer[0],resp.buffer[1]};
    // write it to the out buffer
@@ -83,6 +82,13 @@ void i2cReceiveEvent(int bytesReceived)
 void setup() {
   
   // SETUP wire
+  if (!Block_type){
+  pinMode(RED_LED,OUTPUT);
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(RED_LED,HIGH);
+  digitalWrite(LED_BUILTIN,LOW);
+  }
+
   Wire.begin(i2c_address);
   Wire.onRequest(i2cRequestEvent);
   Wire.onReceive(i2cReceiveEvent);
@@ -109,7 +115,9 @@ void loop() {
 
     // 2) zero that flag, so we don't process multiple times
     pendingCommandLength = 0;
-    I2CDevice.doThings(&val);
+    if (Block_type){
+      I2CDevice.doThings(&val);
+    }
 
   }
 

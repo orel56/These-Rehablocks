@@ -67,7 +67,7 @@ void setup() {
 
   }*/
 
-  void loop() {
+void loop() {
 
   if (! connected){
    Serial.println("0");
@@ -93,7 +93,7 @@ void setup() {
    data[1]=0x0a;
    Serial.println(addr);
    int out = send_command(addr,data,2);
-
+    delay(5);
    if (out == 0) {
     addr=0x0a;
     receive_data(addr,buff,1);
@@ -102,7 +102,7 @@ void setup() {
     }
    }
    else {
-        connected=0;
+        connected=0; 
         }
    delay(100);
   }
@@ -114,6 +114,7 @@ void setup() {
     receive_data(addr,buff,2);
     val_potar= buff[1]<<8;
     val_potar=val_potar | ((uint16_t) buff[0]);
+    Serial.println(val_potar);
    }
    else {
         connected=0;
