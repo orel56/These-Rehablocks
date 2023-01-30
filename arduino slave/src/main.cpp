@@ -13,6 +13,7 @@ volatile uint8_t pendingCommandLength = 0;
 
 int val=0;
 
+addrTab findAddr;
 
 /* 
  *  i2cRequestEvent 
@@ -34,8 +35,6 @@ void i2cReceiveEvent(int bytesReceived)
 {
   uint8_t msgLen = 0;
   // loop over each incoming byte
-  Serial.println(TWAR);
-
   for (int i = 0; i < bytesReceived; i++)
   {
     // stick that byte in our receive buffer
@@ -79,6 +78,17 @@ void i2cReceiveEvent(int bytesReceived)
   }
 }
 
+
+bool isInTab(uint8_t value, addrTab tab){
+  for (int k=0;k<tab.size;k++){
+    if (tab.addrs[k]==value){
+      return true;
+    }
+  }
+  return false;
+
+}
+
 void setup() {
   
   // SETUP wire
@@ -89,6 +99,7 @@ void setup() {
   digitalWrite(LED_BUILTIN,LOW);
   }
 
+  randomSeed(analogRead(A2));
   Wire.begin(i2c_address);
   Wire.onRequest(i2cRequestEvent);
   Wire.onReceive(i2cReceiveEvent);
@@ -102,7 +113,17 @@ void setup() {
  * pending commands when they come in.
  */
 void loop() {
+  findAddr=I2CDevice.scan();
+  while(isInTab(I2CDevice.my_addr,findAddr)){
+    I2CDevice.changeAddr(findAddr);
+    findAddr=I2CDevice.scan();
+    Serial.println("current addr");
+    Serial.println(I2CDevice.my_addr);
+  };
+
   if (pendingCommandLength) {
+    Serial.println("hello there");
+
     // oh my, we've received a command!
     
     // if you're going to be very slow in processing this,

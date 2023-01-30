@@ -1,11 +1,20 @@
 #include <Arduino.h>
 #include <Wire.h>
-int val=0;
+#include <config.h>
+
 uint8_t buff[20];
+
 uint8_t data[3];
+
 uint16_t val_potar;
-uint8_t addr=0x08;
-int connected = 0;
+
+bool change  = 0;
+
+Tab findAddr;
+
+slaveList list;
+
+
 
 int send_command(uint8_t addr,uint8_t * datas,const uint8_t bytes) {
   Wire.beginTransmission(addr);
@@ -30,7 +39,54 @@ void receive_data(uint8_t addr,uint8_t * data_buffer, uint8_t bytesToBeReceived)
 
 }
 
+bool scan(Tab *slaveAddr){
+  byte error, address;
+  int chg=1;
+  Tab newAddr;
+  Serial.println("Scanning...");
 
+  newAddr.size=0;
+  for(address = 8; address < 127; address++ ) 
+  {
+    // The i2c_scanner uses the return value of
+    // the Write.endTransmisstion to see if
+    // a device did acknowledge to the address.
+
+    Wire.beginTransmission(address);
+    error = Wire.endTransmission();
+
+    if (error == 0)
+
+    {
+      Serial.print("I2C device found at address 0x");
+      if (address<16) 
+        Serial.print("0");
+      Serial.print(address,HEX);
+      Serial.println("  !");
+      newAddr.addrs[newAddr.size]=address;
+      newAddr.size++;
+    }
+    else if (error==4) 
+    {
+      Serial.print("Unknown error at address 0x");
+      if (address<16) 
+        Serial.print("0");
+      Serial.println(address,HEX);
+    }    
+  }
+  Serial.println("on sort ");
+
+  if(slaveAddr->size <= newAddr.size){
+    chg=memcmp(newAddr.addrs,slaveAddr->addrs,slaveAddr->size);
+  }
+  else {
+    chg=memcmp(newAddr.addrs,slaveAddr->addrs,newAddr.size);
+  }
+
+  *slaveAddr=newAddr;
+
+  return chg;
+};
 
 void setup() {
   Serial.begin(9600);
@@ -69,60 +125,33 @@ void setup() {
 
 void loop() {
 
-  if (! connected){
-   Serial.println("0");
-   data[0]=0x00;
-   int out = send_command(addr,data,1);
+  Serial.print("loop");
 
-   if (out == 0) {
-    receive_data(addr,buff,1);
-    if (buff[0]==0x01){
-      connected=1;
-    }
+  change=scan(&findAddr);
 
-   }
-   else {
-        connected=0;
-        }
-   delay(100);
-  }
-  else if (connected == 1){
-   Serial.println("1");
+  Serial.print("loop");
 
-   data[0]=0x01;
-   data[1]=0x0a;
-   Serial.println(addr);
-   int out = send_command(addr,data,2);
-    delay(5);
-   if (out == 0) {
-    addr=0x0a;
-    receive_data(addr,buff,1);
-    if (buff[0]==0x02){
-      connected=2;
-    }
-   }
-   else {
-        connected=0; 
-        }
-   delay(100);
+  if (change){
+    Serial.print("my oh my");
   }
   else {
-   data[0]=0x02;
+    Serial.println("everything is fine");
+  }
+
+
+  /* data[0]=0x05;
    int out = send_command(addr,data,1);
-
    if (out == 0) {
-    receive_data(addr,buff,2);
-    val_potar= buff[1]<<8;
-    val_potar=val_potar | ((uint16_t) buff[0]);
-    Serial.println(val_potar);
+      receive_data(addr,buff,2);
    }
-   else {
-        connected=0;
-        }
-   delay(100);
+    else {Serial.println("not received");}
+   
+   for (int k=0; k<2;k++){
+    delay(10);
+    Serial.println("buffer i");
+    Serial.println(buff[k]);
 
-    
-  }
-  delay(100);
+   }*/
 
   }
+  
