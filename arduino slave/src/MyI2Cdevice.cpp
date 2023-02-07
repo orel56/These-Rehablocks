@@ -129,3 +129,9 @@ void MyI2CPeripheral::changeAddr(addrTab usedAddr){
   TWAR=addr<<1;
 
 };
+
+void MyI2CPeripheral::sendReady(){
+  uint8_t data[1]={0x1a};
+
+  Wire.write(data,1);
+}

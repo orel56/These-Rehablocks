@@ -49,4 +49,6 @@ class MyI2CPeripheral {
 
     void changeAddr(addrTab usedAddr);
 
+    void sendReady();
+
 };

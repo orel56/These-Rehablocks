@@ -13,6 +13,10 @@ volatile uint8_t pendingCommandLength = 0;
 
 int val=0;
 
+long cpt=0;
+
+bool scanDone=false;
+
 addrTab findAddr;
 
 /* 
@@ -113,6 +117,9 @@ void setup() {
  * pending commands when they come in.
  */
 void loop() {
+if (!scanDone){
+if (cpt%50000==0 && cpt<=150000){
+  Serial.println(cpt%50000);
   findAddr=I2CDevice.scan();
   while(isInTab(I2CDevice.my_addr,findAddr)){
     I2CDevice.changeAddr(findAddr);
@@ -120,7 +127,17 @@ void loop() {
     Serial.println("current addr");
     Serial.println(I2CDevice.my_addr);
   };
-
+  cpt++;
+}
+else if (cpt%50000!=0 && cpt<150000){
+  cpt++;
+}
+else {
+  scanDone=true;
+  Serial.println("scan done");
+  I2CDevice.sendReady();
+}
+}
   if (pendingCommandLength) {
     Serial.println("hello there");
 

@@ -5,16 +5,16 @@
 uint8_t buff[20];
 
 uint8_t data[3];
-
+volatile uint8_t receivedBytes[RECEIVED_COMMAND_MAX_BYTES];
 uint16_t val_potar;
 
 bool change  = 0;
 
 Tab findAddr;
 
-slaveList list;
+slaveList listSlave;
 
-
+long cpt=0;
 
 int send_command(uint8_t addr,uint8_t * datas,const uint8_t bytes) {
   Wire.beginTransmission(addr);
@@ -88,9 +88,38 @@ bool scan(Tab *slaveAddr){
   return chg;
 };
 
+
+void receive_ready(int bytes){
+ for (int i = 0; i < bytes; i++)
+  {
+    // stick that byte in our receive buffer
+  receivedBytes[i] = Wire.read();
+  Serial.println(receivedBytes[i]);
+  }
+
+  if (receivedBytes[0]==26){
+    change=scan(&findAddr);
+  }
+
+}
+
+void request(){}
+
+
+bool checkAddr(uint8_t addr,slaveList slaves){
+  for (int k=0;k<slaves.size;k++){
+    if (slaves.list[k].addr==addr){
+      return true;
+    }
+  }
+  return false;
+}
+
+
 void setup() {
   Serial.begin(9600);
   Wire.begin();
+
 }
 
 /* void loop() {
@@ -125,20 +154,83 @@ void setup() {
 
 void loop() {
 
-  Serial.print("loop");
-
-  change=scan(&findAddr);
-
-  Serial.print("loop");
-
+  if (!cpt){
+    Serial.print("loop");
+    change=scan(&findAddr);
   if (change){
-    Serial.print("my oh my");
+    Serial.println(findAddr.size);
+    for(int k=0;k<findAddr.size;k++){
+      if (!checkAddr(findAddr.addrs[k],listSlave))
+      {
+        slave newslave;
+        newslave.addr=findAddr.addrs[k];
+        data[0]=0x05;
+        int out = send_command(newslave.addr,data,1);
+        if (out == 0) {
+            receive_data(newslave.addr,buff,2);
+            newslave.type=buff[1];
+        }
+        else {
+          Serial.println("error with slave : ");
+          Serial.println(newslave.addr);
+          Serial.println("new slave does not respond");
+        }
+
+        listSlave.list[listSlave.size + 1]=newslave;
+        listSlave.size++;
+      }
+    }
   }
   else {
     Serial.println("everything is fine");
   }
+  cpt++;
+  }
+  else{
+    cpt++;
+    if (cpt==100000){
+      cpt=0;
+    }
+  }
+  for(int k=0;k<listSlave.size;k++){
+      if (listSlave.list[k].type){
+        data[0]=0x02;
+        int out = send_command(listSlave.list[k].addr,data,1);
+        if (out == 0) {
+            receive_data(listSlave.list[k].addr,buff,2);
+            val_potar= buff[1]<<8;
+            val_potar=val_potar | ((uint16_t) buff[0]);     
+            Serial.println(val_potar);   
+            }
 
+        else {
+          Serial.println("error with slave : ");
+          Serial.println(listSlave.list[k].addr);
+          Serial.println("new slave does not respond");
+        }
+      }
+      else {
+        if(val_potar>200){
+          data[0]=0x03;
+        }
+        else {
+          data[0]=0x04;
 
+        }
+        int out = send_command(listSlave.list[k].addr,data,1);
+        if (out == 0) {
+            receive_data(listSlave.list[k].addr,buff,1);  
+            }
+
+        else {
+          Serial.println("error with slave : ");
+          Serial.println(listSlave.list[k].addr);
+          Serial.println("new slave does not respond");
+        }
+
+      }
+    }  
+    
   /* data[0]=0x05;
    int out = send_command(addr,data,1);
    if (out == 0) {
