@@ -5,7 +5,7 @@
 
 #include "MyI2Cdevice.h"
 #include "config.h"
-
+#include <Wire.h>
 char*mycommands[6]={strdup("connexion"),strdup("change_addr"),strdup("get_value"),strdup("green_led"),strdup("red_led"),strdup("get_type")};
 
 uint16_t hex_val;
@@ -27,6 +27,7 @@ SlaveResponse MyI2CPeripheral::getResponse(int val){
     else if (strcmp(command,"get_type")==0){
 
       response.buffer[0]=(uint8_t) Block_type;
+      Serial.println(response.buffer[0]);
       response.size =1;
       return response;
 
@@ -70,4 +71,67 @@ void MyI2CPeripheral::doThings(int* val){
 
 MyI2CPeripheral::MyI2CPeripheral(){};
 
+addrTab MyI2CPeripheral::scan(){
+  byte error, address;
+  addrTab findAddr;
 
+  Serial.println("Scanning...");
+
+  findAddr.size = 0;
+  for(address = 8; address < 127; address++ ) 
+  {
+    // The i2c_scanner uses the return value of
+    // the Write.endTransmisstion to see if
+    // a device did acknowledge to the address.
+    Wire.beginTransmission(address);
+    error = Wire.endTransmission();
+    if (error == 0)
+    {
+      Serial.print("I2C device found at address 0x");
+      if (address<16) 
+        Serial.print("0");
+      Serial.print(address,HEX);
+      Serial.println("  !");
+      findAddr.addrs[findAddr.size]=address;
+      findAddr.size++;
+    }
+    else if (error==4) 
+    {
+      Serial.print("Unknown error at address 0x");
+      if (address<16) 
+        Serial.print("0");
+      Serial.println(address,HEX);
+    }    
+  }
+  return findAddr;
+
+};
+
+
+void MyI2CPeripheral::changeAddr(addrTab usedAddr){
+  int addr=random(8,127);
+  bool valid=0;
+  while(!valid){
+    addr=random(8,127);
+
+    for(int k=0;k<usedAddr.size;k++){
+
+      if (usedAddr.addrs[k]==addr){
+        valid=0;
+        break;
+      }
+      else if ((k+1)==usedAddr.size){
+        valid=1;
+      }
+    }
+  }
+  my_addr=addr;
+  TWAR=addr<<1;
+
+};
+
+void MyI2CPeripheral::sendReady(){
+  uint8_t data[1]={0x1a};
+
+  Wire.write(data,1);
+}

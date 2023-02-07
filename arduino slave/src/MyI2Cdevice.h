@@ -6,10 +6,15 @@ struct SlaveResponse {
 
 };
 
+struct addrTab {
+  uint8_t addrs[126];
+  uint8_t size;
+};
+
 class MyI2CPeripheral {
   public:
     char *command;
-
+    uint8_t my_addr=0x08;
     MyI2CPeripheral();
 
     /*
@@ -39,5 +44,11 @@ class MyI2CPeripheral {
     void process(volatile uint8_t * buffer, uint8_t len);
 
     void doThings(int *val);
+
+    addrTab scan();
+
+    void changeAddr(addrTab usedAddr);
+
+    void sendReady();
 
 };
