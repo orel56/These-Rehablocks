@@ -1,15 +1,5 @@
 #include "Arduino.h"
-
-struct SlaveResponse {
-    uint8_t buffer[20]={};
-    uint8_t size=0;
-
-};
-
-struct addrTab {
-  uint8_t addrs[126];
-  uint8_t size;
-};
+#include "utils.cpp"
 
 class I2Cmaster {
   public:
@@ -25,7 +15,7 @@ class I2Cmaster {
      *   - uint8_t * buffer;
      *   - uint8_t size;
      */
-    uint8_t send_command(uint8_t addr,char* command,uint8_t * data);
+    uint8_t send_command(uint8_t addr,const char* command,uint8_t * data, uint8_t bytes);
 
     // updtae reponse buffer with the new data received by salve at addr
     void receive_data(uint8_t addr, uint8_t bytesToBeReceived);
@@ -34,19 +24,10 @@ class I2Cmaster {
      * Returns the number of bytes to receive for a given
      * command or register, REGISTERID
      */
-    uint8_t expectedReceiveLength(uint8_t forRegister);
-    /*
-     * process(BUFFER, BUFLEN)
-     * Process incoming data from master. 
-     */
-    void process(volatile uint8_t * buffer, uint8_t len);
-
-    void doThings(int *val);
-
+   
     addrTab scan();
 
     uint8_t apering_process();
 
-    void sendReady();
-
+    uint8_t ping(uint8_t addr);
 };

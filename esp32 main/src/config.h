@@ -6,3 +6,5 @@ char*mycommands[6]={strdup("ping"),
                     strdup("get_type")};
 
 uint8_t size_list = 6;
+
+#define SAP A3;

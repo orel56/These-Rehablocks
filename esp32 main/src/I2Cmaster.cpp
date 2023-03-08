@@ -4,64 +4,47 @@
  */
 
 #include "I2Cmaster.h"
-#include "utils.cpp"
 #include "config.h"
 #include <Wire.h>
-
+#include "device_handler.cpp"
 uint16_t hex_val;
 
-uint8_t I2Cmaster::send_command(uint8_t addr,char* command,uint8_t * data){
-  int commandCode = search_str(mycommands,command,size_list);
+I2Cmaster::I2Cmaster(){};
+
+
+uint8_t I2Cmaster::send_command(uint8_t addr,const char* command,uint8_t * data, uint8_t bytes){
+  int commandCode = search_str(mycommands,strdup(command),size_list);
+  if (commandCode==-1){
+    return 15;
+  }
+  else {
   Wire.beginTransmission(addr);
+  Wire.write(uint8_t(commandCode));
   //Serial.println(datas[0]);
   for (int i=0; i<bytes;i++){
     //Serial.print(datas[i]);
     Wire.write(data[i]);
 
   }
-  
   int out=Wire.endTransmission();
 
   return out;
+  }
 }
 
-
-uint8_t MyI2CPeripheral::expectedReceiveLength(uint8_t forRegister){
-  if (forRegister!=0x01){
-    return 1;
-  }
-  else {return 2;}
-};
-
-void MyI2CPeripheral::process(volatile uint8_t * buffer, uint8_t len){
-    command=mycommands[buffer[0]];
-    Serial.println(command);
-   if (strcmp(command,"change_addr")==0){
-      TWAR = buffer[1] << 1;
+void I2Cmaster::receive_data(uint8_t addr, uint8_t bytesToBeReceived=20){
+  const uint8_t bytesReceived=Wire.requestFrom(addr,bytesToBeReceived);
+  I2Cmaster::reponse_buffer.size=bytesReceived;
+    for (int i=0; i<bytesReceived;i++){
+        uint8_t dataRead=Wire.read();
+        I2Cmaster::reponse_buffer.buffer[i]=dataRead;
     }
-   else if (strcmp(command,"green_led")==0){
-    digitalWrite(RED_LED,LOW);
-    digitalWrite(LED_BUILTIN,HIGH);
-   }
-   else if (strcmp(command,"red_led")==0){
-    digitalWrite(RED_LED,HIGH);
-    digitalWrite(LED_BUILTIN,LOW);
-   }
-    
-};
+}
 
-void MyI2CPeripheral::doThings(int* val){
-    *val = analogRead(A0);
-};
-
-MyI2CPeripheral::MyI2CPeripheral(){};
-
-addrTab MyI2CPeripheral::scan(){
+addrTab I2Cmaster::scan(){
   byte error, address;
   addrTab findAddr;
-
   Serial.println("Scanning...");
-
   findAddr.size = 0;
   for(address = 8; address < 127; address++ ) 
   {
@@ -92,29 +75,22 @@ addrTab MyI2CPeripheral::scan(){
 
 };
 
-
-void MyI2CPeripheral::changeAddr(addrTab usedAddr){
-  int addr=random(8,127);
-  bool valid=0;
-  while(!valid){
-    addr=random(8,127);
-
-    for(int k=0;k<usedAddr.size;k++){
-
-      if (usedAddr.addrs[k]==addr){
-        valid=0;
-        break;
-      }
-      else if ((k+1)==usedAddr.size){
-        valid=1;
-      }
-    }
-  }
-  my_addr=addr;
-  TWAR=addr<<1;
-
-};
-
-void MyI2CPeripheral::sendReady(){
-  
+uint8_t I2Cmaster::ping(uint8_t addr){
+   byte error;
+    Wire.beginTransmission(addr);
+    error = Wire.endTransmission();
+  return error;
 }
+
+uint8_t I2Cmaster::apering_process(){
+  byte error =0;
+  error=I2Cmaster::ping(0x08);
+
+  if (error==0){
+    //0x08 device received ping
+    error=I2Cmaster::send_command(0x08,"change_addr",{})
+  }
+
+
+}
+ 
