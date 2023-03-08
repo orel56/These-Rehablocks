@@ -6,3 +6,4 @@
 #define POT A0
 #define RED_LED A5
 
+#define PIN_READY A11 

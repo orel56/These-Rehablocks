@@ -104,6 +104,7 @@ void setup() {
   }
 
   randomSeed(analogRead(A2));
+  pinMode(PIN_READY,OUTPUT);
   Wire.begin(i2c_address);
   Wire.onRequest(i2cRequestEvent);
   Wire.onReceive(i2cReceiveEvent);
