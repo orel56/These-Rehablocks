@@ -82,15 +82,30 @@ uint8_t I2Cmaster::ping(uint8_t addr){
   return error;
 }
 
-uint8_t I2Cmaster::apering_process(){
+void I2Cmaster::apering_process(){
   byte error =0;
   error=I2Cmaster::ping(0x08);
 
-  if (error==0){
+  if (!error){
     //0x08 device received ping
-    error=I2Cmaster::send_command(0x08,"change_addr",{})
+    uint8_t new_addr= ask_free_addr(0x08);
+    uint8_t data[0];
+    data[0]=new_addr;
+    error=I2Cmaster::send_command(0x08,"change_addr",data,1);
+
+    if (!error){
+      I2Cmaster::receive_data(new_addr,1);
+
+      if (I2Cmaster::reponse_buffer.buffer[0]==0x01){
+
+          error=I2Cmaster::send_command(new_addr,"get_info",{},0);
+
+          if(!error){
+            I2Cmaster::receive_data(new_addr);
+            add_new_device(&(I2Cmaster::reponse_buffer),new_addr);
+          }
+      }
+    }
   }
-
-
 }
  

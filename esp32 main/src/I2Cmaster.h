@@ -27,7 +27,7 @@ class I2Cmaster {
    
     addrTab scan();
 
-    uint8_t apering_process();
+    void apering_process();
 
     uint8_t ping(uint8_t addr);
 };

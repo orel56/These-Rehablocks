@@ -3,10 +3,12 @@
 
 DeviceList list_devices=DeviceList();
 
+int i=0;
 
-void add_new_device(SlaveResponse* response_info){};
+void add_new_device(SlaveResponse* response_info, uint8_t addr){};
 
 uint8_t ask_free_addr(uint8_t addr){
     //return list_devices.get_free_addr();
-    return addr + 1;
+    i++;
+    return addr +i;
 }; 

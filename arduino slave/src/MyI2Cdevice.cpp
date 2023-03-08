@@ -6,7 +6,7 @@
 #include "MyI2Cdevice.h"
 #include "config.h"
 #include <Wire.h>
-char*mycommands[6]={strdup("connexion"),strdup("change_addr"),strdup("get_value"),strdup("green_led"),strdup("red_led"),strdup("get_type")};
+char*mycommands[6]={strdup("ping"),strdup("change_addr"),strdup("get_value"),strdup("green_led"),strdup("red_led"),strdup("get_info")};
 
 uint16_t hex_val;
 
