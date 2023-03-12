@@ -1,21 +1,26 @@
 #include "Arduino.h"
-
+#include "config.h"
 struct SlaveResponse {
     uint8_t buffer[20]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     uint8_t size=0;
 
 };
 
-struct addrTab {
-  uint8_t addrs[126];
-  uint8_t size;
-};
-
-class MyI2CPeripheral {
+class Device {
   public:
     char *command;
+    volatile uint8_t receivedBytes[RECEIVED_COMMAND_MAX_BYTES];
+    volatile uint8_t receivedByteIdx = 0;
+
+    volatile uint8_t pendingCommand[RECEIVED_COMMAND_MAX_BYTES];
+    volatile uint8_t pendingCommandLength = 0;
     uint8_t my_addr=0x08;
-    MyI2CPeripheral();
+
+    String mode = "";
+
+    bool deco_btn = 0;
+    uint8_t connect_follow=0;
+    Device();
 
     /*
      * getResponse -- returns an appropriate buffer, 
@@ -26,10 +31,7 @@ class MyI2CPeripheral {
      *   - uint8_t * buffer;
      *   - uint8_t size;
      */
-    SlaveResponse getResponse(int val);
-
-
-
+    SlaveResponse getResponse();
     /*
      * expectedReceiveLength(REGISTERID)
      * Returns the number of bytes to receive for a given
@@ -43,12 +45,13 @@ class MyI2CPeripheral {
      */
     void process(volatile uint8_t * buffer, uint8_t len);
 
-    void doThings(int *val);
+    void doThings();
 
-    addrTab scan();
+    void changeAddr(uint8_t addr);
 
-    void changeAddr(addrTab usedAddr);
-
-    void sendReady();
+    void deconnect();
+    void connect();
+    void tick();
 
 };
+
