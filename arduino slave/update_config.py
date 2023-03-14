@@ -9,14 +9,13 @@ from yaml.loader import Loader
 ini_template = """
 [env:%s]
 src_filter =
-    +<../ws_server/*>
 %s
     
 build_flags = ${env.build_flags}
 %s
 """
 
-configs = glob.glob('src/*.yaml')
+configs = glob.glob('src/pioconfig/*.json')
 board_names = []
 changed = False
 
@@ -42,23 +41,10 @@ def appendFlags(entries, name):
     flags = ''
     for key in entries:
         value = entries[key]
+        flags += "    -D%s=%s\n" % ((name).upper(),"1")
         if type(value) == str:
             if key[-1] == '!':
                 flags += "    -D%s=%s\n" % ((name+'_'+key[:-1]).upper(), value)
-            else:
-                parts = key.split('_')
-                if parts[-1] == 'pin':
-                    # Here for legacy reasons, ! should be used instead in the future
-                    flags += "    -D%s=%s\n" % ((name+'_'+key).upper(), value)
-                else:
-                    flags += "    '-D%s=\"%s\"'\n" % (
-                        (name+'_'+key).upper(), value)
-        elif type(value) == bool:
-            flags += "    -D%s=%s\n" % ((name+'_'+key).upper(),
-                                        {False: 0, True: 1}[value])
-        elif type(value) == list:
-            data = json.dumps(value).replace("\"", "\\\\\"")
-            flags += "    '-D%s=\"%s\"'\n" % ((name+'_'+key).upper(), data)
         else:
             flags += "    -D%s=%s\n" % ((name+'_'+key).upper(), value)
     flags += "    \n"
@@ -70,44 +56,34 @@ for config in configs:
     ini = ''
     srcs = ''
     flags = ''
-    board_name = os.path.basename(board).split('.')[0]
+    board_name = os.path.basename(config).split('.')[0]
     board_names.append(board_name)
 
-    with open(board, 'r') as f:
+    with open(config, 'r') as f:
         try:
             config = yaml.load(f, Loader=yaml.Loader)
 
-            if 'network' in config:
-                network_config = config['network']
-                network_config[network_config['type']] = 1
-                flags += "    ; Network\n"
-                flags += appendFlags(network_config, 'network')
-                if network_config['type'] == 'ethernet':
-                    flags += '    -DNETWORK_CONTROLLER=ETHERNET_CONTROLLER_W5X00'
-                else:
-                    flags += '    -DNETWORK_CONTROLLER=NETWORK_CONTROLLER_WIFI'
-                flags += "\n\n"
-            else:
-                print('No network configuration in ' + board)
-
-            if 'modules' in config and config['modules'] is not None:
-                for module in config['modules']:
-                    if not os.path.exists('src/%s.cpp' % module):
-                        print('! Module not found: %s' % module)
+            if 'device' in config and config['device'] is not None:
+                for device in config['device']:
+                    if not os.path.exists('src/devices/%s.cpp' % device):
+                        print('! Module not found: %s' % device)
                         exit(1)
-                    srcs += "    +<%s.cpp>\n" % module
-
-                    if module=="leds" and "animations" not in config['modules'] :
-                        srcs += "    +<%s.cpp>\n" % "animations"
+                    srcs += "    +<devices/%s.cpp>\n" % device
                     
 
-                    if config['modules'][module]:
-                        flags += "    ; From %s\n" % module
-                        flags += appendFlags(config['modules'][module], module)
-                        # print(flags)
+                    for name in config['device'][device]:
+                        if not os.path.exists('src/devices/%s.cpp' % name):
+                            print('! Module not found: %s' % name)
+                            exit(1)
+                        srcs += "    +<devices/%s.cpp>\n" % name
+
+                        if config['device'][device][name] : 
+                            flags += "    ; From %s\n" % name
+                            flags += appendFlags(config['device'][device][name], name)
+                            # print(flags)
 
             ini = ini_template % (board_name, srcs, flags)
-            ini_filename = 'boards/platformio/%s.ini' % board_name
+            ini_filename = 'src/pioconfig/platformio_ini/%s.ini' % board_name
 
             before = None
             if os.path.isfile(ini_filename):
@@ -125,9 +101,9 @@ for config in configs:
                     changed = True
 
         except yaml.scanner.ScannerError as e:
-            print('Yaml file ' + board + ' contain errors: ' + "\n\n" + str(e))
+            print('Yaml file ' + config + ' contain errors: ' + "\n\n" + str(e))
 
-inis = glob.glob('boards/platformio/*.ini')
+inis = glob.glob('src/pioconfig/platformio_ini/*.ini')
 for ini in inis:
     board_name = os.path.basename(ini).split('.')[0]
     if board_name not in board_names:

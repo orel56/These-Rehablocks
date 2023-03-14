@@ -1,7 +1,7 @@
 #include "Arduino.h"
 #include "config.h"
 struct SlaveResponse {
-    uint8_t buffer[20]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    uint8_t buffer[20]={};
     uint8_t size=0;
 
 };
@@ -9,6 +9,7 @@ struct SlaveResponse {
 class Device {
   public:
     char *command;
+    char*mycommands[3]={strdup("ping"),strdup("change_addr"),strdup("get_info")};
     volatile uint8_t receivedBytes[RECEIVED_COMMAND_MAX_BYTES];
     volatile uint8_t receivedByteIdx = 0;
 

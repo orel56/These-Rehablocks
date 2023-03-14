@@ -8,8 +8,6 @@
 #include <Wire.h>
 #include"EEPROM.h"
 
-char*mycommands[3]={strdup("ping"),strdup("change_addr"),strdup("get_info")};
-
 uint16_t hex_val;
 
 SlaveResponse Device::getResponse(){
@@ -17,8 +15,6 @@ SlaveResponse Device::getResponse(){
     Serial.print("command in get response : ");
     Serial.println(command);
    if (strcmp(command,"get_info")==0){
-
-     // response.buffer[0]=(uint8_t) Block_type;
       Serial.println(response.buffer[0]);
       response.size =1;
       return response;
@@ -44,17 +40,8 @@ void Device::process(volatile uint8_t * buffer, uint8_t len){
     command=mycommands[buffer[0]];
     Serial.println(command);
    if (strcmp(command,"change_addr")==0){
-      TWAR = buffer[1] << 1;
-    }
-   else if (strcmp(command,"green_led")==0){
-    digitalWrite(RED_LED,LOW);
-    digitalWrite(LED_BUILTIN,HIGH);
-   }
-   else if (strcmp(command,"red_led")==0){
-    digitalWrite(RED_LED,HIGH);
-    digitalWrite(LED_BUILTIN,LOW);
-   }
-    
+      this->changeAddr(buffer[1]);
+          }
 };
 
 void Device::doThings(){
@@ -64,8 +51,9 @@ Device::Device(){};
 
 
 void Device::changeAddr(uint8_t addr){
-  my_addr=addr;
+  this->my_addr=addr;
   TWAR=addr<<1;
+  EEPROM.write(0x00,this->my_addr);
 }
 
 void Device::tick(){
@@ -81,12 +69,12 @@ void Device::tick(){
     // Here we just do it "real time" for simplicity
 
     // 1) process that command
-    Device::process(pendingCommand, pendingCommandLength);
+    this->process(pendingCommand, pendingCommandLength);
 
     // 2) zero that flag, so we don't process multiple times
     pendingCommandLength = 0;
 
-    Device::doThings();
+    this->doThings();
 
   }
 

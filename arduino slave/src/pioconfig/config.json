@@ -1,0 +1,13 @@
+{
+    "device" : {
+        "actuator" :{
+            "led" : {
+                "pin!" : "A0"
+            }
+        }
+    },
+    "info" :{
+        "data_size" : 8,
+        "usage" : "..."
+    }
+}
