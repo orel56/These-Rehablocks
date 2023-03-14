@@ -12,5 +12,9 @@ class list (tk.Frame):
             device_name = os.path.basename(device).split('.')[0]
             if device_name not in ["sensor","actuator"] : 
                 self.list_devices.append(device_name)
-        
-        self.box=[tk.Listbox()]
+        self.list_var=tk.StringVar()
+        self.list_var.set("un deux trois quatre")
+        self.box=[tk.Listbox(activestyle="underline",listvariable=self.list_var)]
+        self.box[0].place(x=300,y=55)
+        self.selected_var=self.box[0].curselection()
+

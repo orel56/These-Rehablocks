@@ -39,9 +39,10 @@ def appendFlags(entries, name):
     flatten(entries)
 
     flags = ''
+    flags += "    -D%s=%s\n" % ((name).upper(),"1")
+
     for key in entries:
         value = entries[key]
-        flags += "    -D%s=%s\n" % ((name).upper(),"1")
         if type(value) == str:
             if key[-1] == '!':
                 flags += "    -D%s=%s\n" % ((name+'_'+key[:-1]).upper(), value)

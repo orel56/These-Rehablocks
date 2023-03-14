@@ -100,9 +100,9 @@ void setup() {
  * pending commands when they come in.
  */
 void loop() {
+  Serial.print(I2CDevice->mode);
 
 if (I2CDevice->mode == "deconnect"){
-
   I2CDevice->deconnect();
 
 }

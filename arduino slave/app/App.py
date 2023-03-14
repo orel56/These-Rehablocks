@@ -26,8 +26,11 @@ class App(tk.Tk) :
         self.label[1].place(x=300,y=45)
     def init_list(self) :
         self.list=li.list()
+        self.list.place(x=300,y=55)
 
-
-    def init_button(self):
+    def init_button(self):                                                                                                                                                                                                                                           
         self.next_button=tk.Button(self,text="next",state="disabled", activebackground="#c8ad7f",activeforeground="#fff",bg="#8b6c42",fg="#fff",highlightbackground="#8b6c42",relief="flat")
         self.next_button.place(x=150,y=45)
+    
+    def check_button_value(self) : 
+        pass

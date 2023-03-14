@@ -15,14 +15,14 @@ SlaveResponse Device::getResponse(){
     Serial.print("command in get response : ");
     Serial.println(command);
    if (strcmp(command,"get_info")==0){
+      response.buffer[0]=0x01;
       Serial.println(response.buffer[0]);
       response.size =1;
       return response;
 
     }
-    else {
+    else if (strcmp(command,"ping")==0 || strcmp(command,"change_addr")==0) {
        response.buffer[0]= 0x01;
-
        response.size=1;
        return response;
     }
@@ -37,8 +37,8 @@ uint8_t Device::expectedReceiveLength(uint8_t forRegister){
 };
 
 void Device::process(volatile uint8_t * buffer, uint8_t len){
-    command=mycommands[buffer[0]];
-    Serial.println(command);
+   command=mycommands[buffer[0]];
+   Serial.println(command);
    if (strcmp(command,"change_addr")==0){
       this->changeAddr(buffer[1]);
           }

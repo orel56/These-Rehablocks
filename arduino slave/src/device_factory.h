@@ -7,5 +7,5 @@ Device * I2CDevice = nullptr;
     I2CDevice = new Led();
 #elif POTENTIOMETER 
     #include "devices/potentiometer.h"
-    I2CDevice = new Potentiometer();
+    I2CDevice = new Potentiometer(POTENTIOMETER_PIN,POTENTIOMETER_THRESHOLD);
 #endif
