@@ -16,10 +16,9 @@ int search_str (char** list_str,char* str,int size_list){
 
 char*mycommands[6]={strdup("ping"),
                     strdup("change_addr"),
+                    strdup("get_info"),
                     strdup("get_value"),
-                    strdup("green_led"),
-                    strdup("red_led"),
-                    strdup("get_type")}; 
+                    strdup("set_value")}; 
 
 uint8_t size_list = 6;
 
@@ -104,7 +103,7 @@ void I2Cmaster::apering_process(){
   if (!error){
     //0x08 device received ping
     uint8_t new_addr= ask_free_addr();
-    uint8_t data[0];
+    uint8_t data[1];
     data[0]=new_addr;
     error=I2Cmaster::send_command(0x08,"change_addr",data,1);
 
@@ -144,3 +143,28 @@ void I2Cmaster::i2c_init(){
     }
   }
   }
+
+void I2Cmaster::i2c_get(){
+  std::vector<uint8_t[2]> sensor_list = filter_list("sensor");
+  uint8_t error =0;
+  uint8_t data[0];
+  int x =0;
+  if (! (sensor_list.empty())){
+    for(int i =0; i<sensor_list.size();i++){
+      x=0;
+      error=I2Cmaster::send_command(sensor_list[0][0],"get_value",data,0);
+      if (!error){
+         
+        this->receive_data(0x0b,5);
+        if (reponse_buffer.buffer[0]==0x01){
+            for (int i=1;i<5;i++){
+              x = reponse_buffer.buffer[i];
+              x = x<<((i-1)*8);
+        }
+      }
+        else {}
+    }
+    
+  }
+          
+};

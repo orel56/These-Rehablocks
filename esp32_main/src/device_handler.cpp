@@ -16,3 +16,28 @@ uint8_t ask_free_addr(){
     }
     return addrs.back()+1;
 }; 
+
+std::vector<uint8_t[2]> filter_list (const char* filter){
+    std::vector<uint8_t[2]> device_filtered;
+    uint8_t x[2];
+    if (!(strcmp(filter,"sensor"))){
+        for (int i=0;i<list_devices.size();i++){
+            if (list_devices[i]==0){
+                x[0]=i+9;
+                x[1]=0;
+                device_filtered.push_back(x);
+            }
+        }
+    }
+    else if (!(strcmp(filter,"actuator"))){
+        for (int i=0;i<list_devices.size();i++){
+            if (list_devices[i]==1){
+                x[0]=i+9;
+                x[1]=1;
+                device_filtered.push_back(x);
+            }
+        }
+    }
+    return device_filtered;
+         
+}
