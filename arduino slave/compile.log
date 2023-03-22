@@ -1,0 +1,17 @@
+Warning! `src_filter` configuration option in section [env:config] is deprecated and will be removed in the next release! Please use `build_src_filter` instead
+Processing config (src_filter: +<devices/sensor.cpp>, +<devices/potentiometer.cpp>; build_flags: -DBOARD_NAME="\"${PIOENV}\"", -DPOTENTIOMETER=1, -DPOTENTIOMETER_PIN=A0, -DPOTENTIOMETER_THRESHOLD=100; platform: atmelavr; board: micro; framework: arduino; extra_scripts: pre:update_config.py)
+--------------------------------------------------------------------------------
+CONFIGURATION: https://docs.platformio.org/page/boards/atmelavr/micro.html
+PLATFORM: Atmel AVR (4.0.1) > Arduino Micro
+HARDWARE: ATMEGA32U4 16MHz, 2.50KB RAM, 28KB Flash
+DEBUG: Current (simavr) External (simavr)
+PACKAGES: 
+ - framework-arduino-avr @ 5.1.0 
+ - toolchain-atmelavr @ 1.70300.191015 (7.3.0)
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 5 compatible libraries
+Scanning dependencies...
+No dependencies
+Building in release mode
+avr-g++ -o .pio/build/config/firmware.elf -mmcu=atmega32u4 -Os -Wl,--gc-sections -flto -fuse-linker-plugin .pio/build/config/src/devices/potentiometer.cpp.o .pio/build/config/src/devices/sensor.cpp.o -L.pio/build/config -Wl,--start-group .pio/build/config/libFrameworkArduinoVariant.a .pio/build/config/libFrameworkArduino.a -lm -Wl,--end-group

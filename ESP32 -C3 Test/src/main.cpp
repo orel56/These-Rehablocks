@@ -6,15 +6,13 @@ uint8_t buff[20];
 
 uint8_t data[3];
 volatile uint8_t receivedBytes[RECEIVED_COMMAND_MAX_BYTES];
-uint16_t val_potar;
+int val_potar;
 
-bool change  = 0;
+bool change  = 1;
 
 Tab findAddr;
 
 slaveList listSlave;
-
-long cpt=0;
 
 int send_command(uint8_t addr,uint8_t * datas,const uint8_t bytes) {
   Wire.beginTransmission(addr);
@@ -39,7 +37,7 @@ void receive_data(uint8_t addr,uint8_t * data_buffer, uint8_t bytesToBeReceived)
 
 }
 
-bool scan(Tab *slaveAddr){
+/* bool scan(Tab *slaveAddr){
   byte error, address;
   int chg=1;
   Tab newAddr;
@@ -86,10 +84,10 @@ bool scan(Tab *slaveAddr){
   *slaveAddr=newAddr;
 
   return chg;
-};
+}; */
 
 
-void receive_ready(int bytes){
+/* void receive_ready(int bytes){
  for (int i = 0; i < bytes; i++)
   {
     // stick that byte in our receive buffer
@@ -101,19 +99,19 @@ void receive_ready(int bytes){
     change=scan(&findAddr);
   }
 
-}
+} */
 
 void request(){}
 
 
-bool checkAddr(uint8_t addr,slaveList slaves){
+/* bool checkAddr(uint8_t addr,slaveList slaves){
   for (int k=0;k<slaves.size;k++){
     if (slaves.list[k].addr==addr){
       return true;
     }
   }
   return false;
-}
+} */
 
 
 void setup() {
@@ -121,38 +119,78 @@ void setup() {
   Wire.begin();
 
 }
-
-/* void loop() {
-
-  if (addr==0x08){
+ void loop() {
+if (change==0){
    data[0]=0x00;
    Serial.printf("Sending command 0x00 to 0x08 device...");
    int out = send_command(0x08,data,1);
-   Serial.print("transmission output : ");
-   Serial.println(out);
-
    if (out == 0) {
-    Serial.printf("Receiving data must be ...");
-    receive_data(0x08,buff,1);
-    Serial.printf("printing data received : ");
-    val_potar= buff[1]<<8;
-    val_potar=val_potar | ((uint16_t) buff[0]);
+    data[0]=0x01;
+    data[1]=0x0b;
+    out= send_command(0x08,data,2);
+    if (out==0){
+    receive_data(0x0b,buff,1);
+    if (buff[0]==0x01){
+      data[0]=0x02;
+      out= send_command(0x0b,data,1);
+      if (out==0){
+        receive_data(0x0b,buff,1);
+         if (buff[0]==0x01){
+          change=1;}
+          else{
+            Serial.println("wrong output for get_info");
+          }
+     }
+        else{
+            Serial.println("get_info didn't reach device");
+          }
     
-    Serial.println(buff[0],BIN);
-    Serial.println(buff[1],BIN);
-
-    Serial.println(val_potar,BIN);
-    Serial.println(val_potar);
+    }
+    else{
+            Serial.println("wrong output for change_addr");
+          }
 
    }
-   else {Serial.println("something went wrong"); 
-        }
+    else{
+            Serial.println("change_addr didn't reach device");
+          }
    delay(100);
+  }          
+  else{
+            Serial.println("ping didn't reach device");
+          }
+  
   }
+  else {
+    int x=0;
+    val_potar=0;
+    data[0]=0x03;
+    int out= send_command(0x0b,data,1);
+    if (out==0){
+    receive_data(0x0b,buff,5);
+    Serial.println(buff[0]);
 
-  }*/
+    if (buff[0]==0x01){
+        for (int i=1;i<5;i++){
+          x = buff[i];
+          x = x<<((i-1)*8);
+          val_potar+=x;
+      }
 
-void loop() {
+      Serial.println(val_potar);
+  }
+      else{
+            Serial.println("wrong answer for get_value");
+          }    
+    }
+  else{
+            Serial.println("get_value didn't reach device");
+          }
+  delay(1000);
+
+  }}
+
+/* void loop() {
 
   if (!cpt){
     Serial.print("loop");
@@ -245,5 +283,4 @@ void loop() {
 
    }*/
 
-  }
   

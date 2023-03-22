@@ -8,14 +8,15 @@ from yaml.loader import Loader
 
 ini_template = """
 [env:%s]
-src_filter =
+build_src_filter =
+    +<../main/*>
 %s
     
 build_flags = ${env.build_flags}
 %s
 """
 
-configs = glob.glob('src/pioconfig/*.json')
+configs = glob.glob('pioconfig/*.json')
 board_names = []
 changed = False
 
@@ -66,17 +67,17 @@ for config in configs:
 
             if 'device' in config and config['device'] is not None:
                 for device in config['device']:
-                    if not os.path.exists('src/devices/%s.cpp' % device):
+                    if not os.path.exists('src/%s.cpp' % device):
                         print('! Module not found: %s' % device)
                         exit(1)
-                    srcs += "    +<devices/%s.cpp>\n" % device
+                    srcs += "    +<%s.cpp>\n" % device
                     
 
                     for name in config['device'][device]:
-                        if not os.path.exists('src/devices/%s.cpp' % name):
+                        if not os.path.exists('src/%s.cpp' % name):
                             print('! Module not found: %s' % name)
                             exit(1)
-                        srcs += "    +<devices/%s.cpp>\n" % name
+                        srcs += "    +<%s.cpp>\n" % name
 
                         if config['device'][device][name] : 
                             flags += "    ; From %s\n" % name
@@ -84,7 +85,7 @@ for config in configs:
                             # print(flags)
 
             ini = ini_template % (board_name, srcs, flags)
-            ini_filename = 'src/pioconfig/platformio_ini/%s.ini' % board_name
+            ini_filename = 'pioconfig/platformio_ini/%s.ini' % board_name
 
             before = None
             if os.path.isfile(ini_filename):
@@ -104,7 +105,7 @@ for config in configs:
         except yaml.scanner.ScannerError as e:
             print('Yaml file ' + config + ' contain errors: ' + "\n\n" + str(e))
 
-inis = glob.glob('src/pioconfig/platformio_ini/*.ini')
+inis = glob.glob('pioconfig/platformio_ini/*.ini')
 for ini in inis:
     board_name = os.path.basename(ini).split('.')[0]
     if board_name not in board_names:

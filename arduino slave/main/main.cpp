@@ -1,17 +1,18 @@
 #include <Wire.h>
 #include "config.h"
 #include "device_factory.h"
-#include "EEPROM.h"
+#include <EEPROM.h>
+#include <Arduino.h>
 
-int val=0;
+
 
 void i2cRequestEvent()
 {
    // get the response (the I2CDevice knows what to say)
    SlaveResponse resp = I2CDevice->getResponse();
-   uint8_t buf[2]={resp.buffer[0],resp.buffer[1]};
    // write it to the out buffer
-   Wire.write(buf, resp.size); 
+
+   Wire.write(resp.buffer, resp.size); 
 
 }
 void i2cReceiveEvent(int bytesReceived)
@@ -31,8 +32,7 @@ void i2cReceiveEvent(int bytesReceived)
       // expected message length until now... 
       // ask our device what to expect:
       msgLen = I2CDevice->expectedReceiveLength(I2CDevice->receivedBytes[0]);
-      Serial.print("msgLen : ");
-      Serial.println(msgLen);
+
     }
 
     I2CDevice->receivedByteIdx++; /* increment in-byte counter */
@@ -64,8 +64,10 @@ void i2cReceiveEvent(int bytesReceived)
 void setup() {
   // SETUP wire
   pinMode(USR_LED,OUTPUT);
-  pinMode(SDA,INPUT);
-  pinMode(SCL,INPUT);
+  pinMode(SDA,INPUT_PULLUP);
+  pinMode(SCL,INPUT_PULLUP);
+  pinMode(PIN_READY,OUTPUT);
+
   EEPROM.begin();
   Serial.begin(9600);
 
@@ -73,7 +75,7 @@ void setup() {
   if ((digitalRead(SDA)==LOW)&&(digitalRead(SCL)==LOW)){
     I2CDevice->mode="deconnect";
     digitalWrite(USR_LED,LOW);
-    pinMode(DECO_BTN,INPUT);
+    pinMode(DECO_BTN,INPUT_PULLUP);
   }
   else {
     byte i2c_addr;
@@ -82,14 +84,16 @@ void setup() {
     Wire.onRequest(i2cRequestEvent);
     Wire.onReceive(i2cReceiveEvent);
     if (i2c_addr==0x08){
-      I2CDevice->mode="connect";
+      I2CDevice->mode="working";
       digitalWrite(USR_LED,HIGH);
-      pinMode(PIN_READY,OUTPUT);
+      digitalWrite(PIN_READY,HIGH);
+
     }
     else{
       I2CDevice->mode="working";
       digitalWrite(USR_LED,LOW);
-    }
+    }  Serial.println(EEPROM.read(0x00));
+
   }
  
   // do other setup you may need...
@@ -100,8 +104,7 @@ void setup() {
  * pending commands when they come in.
  */
 void loop() {
-  Serial.print(I2CDevice->mode);
-
+  
 if (I2CDevice->mode == "deconnect"){
   I2CDevice->deconnect();
 
@@ -112,7 +115,6 @@ else if (I2CDevice->mode =="connect")
 
 }
 else if (I2CDevice->mode =="working") {
-
   I2CDevice->tick();
 
 }

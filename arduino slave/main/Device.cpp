@@ -12,20 +12,20 @@ uint16_t hex_val;
 
 SlaveResponse Device::getResponse(){
     SlaveResponse response;
-    Serial.print("command in get response : ");
-    Serial.println(command);
-   if (strcmp(command,"get_info")==0){
+
+   if ( command=="get_info"){
       response.buffer[0]=0x01;
       Serial.println(response.buffer[0]);
       response.size =1;
       return response;
 
     }
-    else if (strcmp(command,"ping")==0 || strcmp(command,"change_addr")==0) {
+    else if ( (command=="ping") ||  (command=="change_addr")) {
        response.buffer[0]= 0x01;
        response.size=1;
        return response;
     }
+    return response;
   
 };
 
@@ -37,11 +37,19 @@ uint8_t Device::expectedReceiveLength(uint8_t forRegister){
 };
 
 void Device::process(volatile uint8_t * buffer, uint8_t len){
-   command=mycommands[buffer[0]];
-   Serial.println(command);
-   if (strcmp(command,"change_addr")==0){
+   this->command=this->mycommands[buffer[0]];
+   if ( (command=="change_addr")){
+      this->connect_follow++;
       this->changeAddr(buffer[1]);
           }
+   else if (( (command=="ping")) && (this->my_addr==0x08)){
+      this->mode="connect";
+      this->connect_follow++;
+   }
+   else if ( (command=="get_info") && (this->mode=="connect")){
+      this->connect_follow++;
+
+   }
 };
 
 void Device::doThings(){
@@ -59,8 +67,6 @@ void Device::changeAddr(uint8_t addr){
 void Device::tick(){
 
  if (pendingCommandLength) {
-    Serial.println("hello there");
-
     // oh my, we've received a command!
     
     // if you're going to be very slow in processing this,
@@ -69,12 +75,12 @@ void Device::tick(){
     // Here we just do it "real time" for simplicity
 
     // 1) process that command
-    this->process(pendingCommand, pendingCommandLength);
+    process(pendingCommand, pendingCommandLength);
 
     // 2) zero that flag, so we don't process multiple times
     pendingCommandLength = 0;
 
-    this->doThings();
+    doThings();
 
   }
 
@@ -98,10 +104,10 @@ void Device::deconnect(){
 
 void Device::connect(){
   if (this->connect_follow <3){
-      this->tick();
-      this->connect_follow ++;}
+      this->tick();}
   else {
     digitalWrite(USR_LED,LOW);
+    digitalWrite(PIN_READY,LOW);
     this->mode="working";
   }
 }

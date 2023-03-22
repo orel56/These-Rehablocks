@@ -1,3 +1,5 @@
+#pragma once 
+
 #include "Arduino.h"
 #include "config.h"
 struct SlaveResponse {
@@ -8,8 +10,8 @@ struct SlaveResponse {
 
 class Device {
   public:
-    char *command;
-    char*mycommands[3]={strdup("ping"),strdup("change_addr"),strdup("get_info")};
+    String command;
+    String mycommands[3]={("ping"),("change_addr"),("get_info")};
     volatile uint8_t receivedBytes[RECEIVED_COMMAND_MAX_BYTES];
     volatile uint8_t receivedByteIdx = 0;
 
@@ -44,9 +46,9 @@ class Device {
      * process(BUFFER, BUFLEN)
      * Process incoming data from master. 
      */
-    void process(volatile uint8_t * buffer, uint8_t len);
+    virtual void process(volatile uint8_t * buffer, uint8_t len);
 
-    void doThings();
+    virtual void doThings();
 
     void changeAddr(uint8_t addr);
 

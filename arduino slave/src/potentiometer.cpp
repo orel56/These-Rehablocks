@@ -12,10 +12,12 @@ bool Potentiometer::get_value(){
     if(check_value(current_val)){
         this->current_value=current_val;
         this->send_value=true;
+
     }
     else{
         this->send_value=false;
     }
+    return true;
 
 };
 bool Potentiometer::check_value(int value){

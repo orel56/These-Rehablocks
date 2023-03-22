@@ -4,16 +4,33 @@
  */
 
 #include "I2Cmaster.h"
-#include "config.h"
-#include <Wire.h>
-#include "device_handler.cpp"
+
+int search_str (char** list_str,char* str,int size_list){
+    for (int i=0;i<size_list;i++){
+        if(strcmp(list_str[i],str)==0){
+            return i;
+        }
+    }
+    return -1;
+}
+
+char*mycommands[6]={strdup("ping"),
+                    strdup("change_addr"),
+                    strdup("get_value"),
+                    strdup("green_led"),
+                    strdup("red_led"),
+                    strdup("get_type")}; 
+
+uint8_t size_list = 6;
+
+
 uint16_t hex_val;
 
 I2Cmaster::I2Cmaster(){};
 
 
 uint8_t I2Cmaster::send_command(uint8_t addr,const char* command,uint8_t * data, uint8_t bytes){
-  int commandCode = search_str(mycommands,strdup(command),size_list);
+ int commandCode = search_str(mycommands,strdup(command),size_list);
   if (commandCode==-1){
     return 15;
   }
@@ -41,11 +58,10 @@ void I2Cmaster::receive_data(uint8_t addr, uint8_t bytesToBeReceived=20){
     }
 }
 
-addrTab I2Cmaster::scan(){
+std::vector<byte> I2Cmaster::scan(){
   byte error, address;
-  addrTab findAddr;
+  std::vector<byte> findAddr;
   Serial.println("Scanning...");
-  findAddr.size = 0;
   for(address = 8; address < 127; address++ ) 
   {
     // The i2c_scanner uses the return value of
@@ -60,8 +76,7 @@ addrTab I2Cmaster::scan(){
         Serial.print("0");
       Serial.print(address,HEX);
       Serial.println("  !");
-      findAddr.addrs[findAddr.size]=address;
-      findAddr.size++;
+      findAddr.push_back(address);
     }
     else if (error==4) 
     {
@@ -73,7 +88,7 @@ addrTab I2Cmaster::scan(){
   }
   return findAddr;
 
-};
+}; 
 
 uint8_t I2Cmaster::ping(uint8_t addr){
    byte error;
@@ -88,7 +103,7 @@ void I2Cmaster::apering_process(){
 
   if (!error){
     //0x08 device received ping
-    uint8_t new_addr= ask_free_addr(0x08);
+    uint8_t new_addr= ask_free_addr();
     uint8_t data[0];
     data[0]=new_addr;
     error=I2Cmaster::send_command(0x08,"change_addr",data,1);
@@ -108,4 +123,24 @@ void I2Cmaster::apering_process(){
     }
   }
 }
- 
+
+
+void I2Cmaster::i2c_init(){
+  Wire.begin();
+
+  std::vector<uint8_t> bus_addrs = this->scan();
+  for (int k=0;k<bus_addrs.size();k++){
+    byte error =0;
+    error=I2Cmaster::ping(bus_addrs[k]);
+
+    if (!error){
+
+        error=I2Cmaster::send_command(bus_addrs[k],"get_info",{},0);
+
+        if(!error){
+          I2Cmaster::receive_data(bus_addrs[k]);
+          add_new_device(&(I2Cmaster::reponse_buffer),bus_addrs[k]);
+        }
+    }
+  }
+  }

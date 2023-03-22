@@ -1,6 +1,7 @@
 #include "Arduino.h"
-#include "utils.cpp"
-
+#include <Wire.h>
+#include "config.h"
+#include "device_handler.h"
 class I2Cmaster {
   public:
     struct SlaveResponse reponse_buffer;
@@ -25,9 +26,13 @@ class I2Cmaster {
      * command or register, REGISTERID
      */
    
-    addrTab scan();
+    std::vector<byte> scan();
 
     void apering_process();
+
+    void i2c_get();
+    void i2c_set();
+    void i2c_init();
 
     uint8_t ping(uint8_t addr);
 };
