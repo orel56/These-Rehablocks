@@ -1,43 +1,92 @@
 #include "device_handler.h"
 
-std::vector<uint8_t> list_devices;
-std::vector<uint8_t> addrs;
 
-void add_new_device(SlaveResponse* response_info, uint8_t addr){
-    for (int i=0;i<response_info->size;i++){
-        addrs.push_back(addr);
-        list_devices.push_back(response_info->buffer[i]);
+DeviceHandler::DeviceHandler(){
+  this->list_device=(Device**) malloc(sizeof(Device*)*MAX_DEVICE);
+  this->size_buffer=0;
+  this->size=0;
+}
+
+
+DeviceHandler::DeviceHandler(Device** list_device, uint8_t size){
+  this->list_device=(Device**) malloc(sizeof(Device*)*MAX_DEVICE);
+  for (int i=0;i<size;i++){
+    this->list_device[i]=list_device[i];
+  }
+  this->size_buffer=0;
+  this->size=size;
+}
+
+DeviceHandler::~DeviceHandler(){
+    free(this->list_device);
+}
+
+void DeviceHandler::add_new_device(uint8_t addr,uint8_t type){
+    if (this->size<MAX_DEVICE){
+        if(type){
+        this->list_device[this->size]=new Actuator(addr,type);
+        }
+        else {
+        this->list_device[this->size]=new Sensor(addr,type);
+        }
     }
+    this-> size+=1;
 };
-
-uint8_t ask_free_addr(){
-    if (addrs.empty()){
+ 
+uint8_t DeviceHandler::ask_free_addr(){
+    if (this->size==0){
         return 0x09;
     }
-    return addrs.back()+1;
+    return 0x09+this->size;
 }; 
 
-std::vector<uint8_t[2]> filter_list (const char* filter){
-    std::vector<uint8_t[2]> device_filtered;
-    uint8_t x[2];
+void DeviceHandler::filter_list (const char* filter){
     if (!(strcmp(filter,"sensor"))){
-        for (int i=0;i<list_devices.size();i++){
-            if (list_devices[i]==0){
-                x[0]=i+9;
-                x[1]=0;
-                device_filtered.push_back(x);
+        for (int i=0;i<this->size;i++){
+            if ((this->list_device[i])->type==0){
+                this->filter_buffer[i]=(this->list_device[i])->addr;
             }
         }
     }
     else if (!(strcmp(filter,"actuator"))){
-        for (int i=0;i<list_devices.size();i++){
-            if (list_devices[i]==1){
-                x[0]=i+9;
-                x[1]=1;
-                device_filtered.push_back(x);
+        for (int i=0;i<this->size;i++){
+            if ((this->list_device[i])->type==1){
+                this->filter_buffer[i]=(this->list_device[i])->addr;
             }
         }
+}
+}
+
+void DeviceHandler::update_value (uint8_t addr, int value, bool previous){
+    for (int i=0;i<this->size;i++){
+        if((this->list_device[i])->addr==addr){
+           if (previous){
+            this->list_device[i]->current_value=this->list_device[i]->previous_value;
+           }
+           else {
+           this->list_device[i]->previous_value=this->list_device[i]->current_value;
+           this->list_device[i]->current_value=value;}
+            break;
+        }
     }
-    return device_filtered;
-         
+}
+
+void DeviceHandler::put_in_quarantine(uint8_t addr){
+    for (int i=0;i<this->size;i++){
+        if((this->list_device[i])->addr==addr){
+           this->list_device[i]->quarantine=1;
+            break;
+        }
+    }
+}
+
+
+void DeviceHandler::delete_device(uint8_t addr){
+    for (int i=0;i<this->size;i++){
+        if((this->list_device[i])->addr==addr){
+            delete (this->list_device[i]);
+            this->list_device[i]=NULL;
+            break;
+        }
+    }
 }

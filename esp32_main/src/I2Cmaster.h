@@ -16,7 +16,7 @@ class I2Cmaster {
      *   - uint8_t * buffer;
      *   - uint8_t size;
      */
-    uint8_t send_command(uint8_t addr,const char* command,uint8_t * data, uint8_t bytes);
+    uint8_t send_command(uint8_t addr,const char* command,uint8_t * data, uint8_t bytes,int commandCode = -1);
 
     // updtae reponse buffer with the new data received by salve at addr
     void receive_data(uint8_t addr, uint8_t bytesToBeReceived);
@@ -28,11 +28,11 @@ class I2Cmaster {
    
     std::vector<byte> scan();
 
-    void apering_process();
+    void apering_process(DeviceHandler* my_handler);
 
-    void i2c_get();
-    void i2c_set();
-    void i2c_init();
+    void i2c_get(DeviceHandler* my_handler);
+    void i2c_set(DeviceHandler* my_handler);
+    void i2c_init(DeviceHandler* my_handler);
 
     uint8_t ping(uint8_t addr);
 };

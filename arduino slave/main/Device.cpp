@@ -12,18 +12,15 @@ uint16_t hex_val;
 
 SlaveResponse Device::getResponse(){
     SlaveResponse response;
-
-   if ( command=="get_info"){
-      response.buffer[0]=0x01;
-      Serial.println(response.buffer[0]);
-      response.size =1;
-      return response;
-
-    }
-    else if ( (command=="ping") ||  (command=="change_addr")) {
+    if ( (command=="ping") ||  (command=="change_addr")) {
        response.buffer[0]= 0x01;
        response.size=1;
        return response;
+    }
+    else {
+      response.buffer[0]=0x01;
+      Serial.println(response.buffer[0]);
+      response.size =1;
     }
     return response;
   

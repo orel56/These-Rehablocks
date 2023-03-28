@@ -35,7 +35,15 @@ SlaveResponse Actuator::getResponse(){
     
     response = Device::getResponse();
 
-    if(command=="set_value"){
+    if ( command=="get_info"){
+      response.buffer[0]=0x01;
+      Serial.println(response.buffer[0]);
+      response.buffer[1]=1;
+      response.size =2;
+      return response;
+
+    }
+    else if(command=="set_value"){
        if(is_set){
         response.buffer[0]=0x01;
        }

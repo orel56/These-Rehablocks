@@ -1,26 +1,24 @@
-#include "I2Cmaster.h"
-#include "Xaal.h"
 #include "DT.h"
 DigitalTwin * mytwin = new DigitalTwin();
 I2Cmaster * I2Cperipheral = new I2Cmaster();
+DeviceHandler* my_handler=new DeviceHandler();
 
 void apaering_process(){
-  I2Cperipheral->apering_process();
+  I2Cperipheral->apering_process(my_handler);
 }
 
 void setup() {
   Serial.begin(9600);
-  I2Cperipheral->i2c_init();
+  I2Cperipheral->i2c_init(my_handler);
   xaal_init();
-  attachInterrupt(SAP,apaering_process,RISING);
 }
 
 void loop() {
-  mytwin->DT_get(I2Cperipheral);
-  mytwin->DT_agregate();
+  mytwin->DT_get(I2Cperipheral,my_handler);
+  //mytwin->DT_agregate();
   mytwin->DT_analyse();
-  mytwin->DT_set(I2Cperipheral);
-  mytwin->DT_working_management();
+  mytwin->DT_set(I2Cperipheral,my_handler);
+  //mytwin->DT_working_management();
   //DT_get --> réccupère les infos de xaal et de i2c
   //DT_aggregate --> aggrège les données réccupéerée précédemment et les anciennes données 
   //DT_analysis --> analyse des données agrégées 

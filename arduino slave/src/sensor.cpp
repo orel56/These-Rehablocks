@@ -30,7 +30,15 @@ uint8_t * Sensor::int_to_bytesarray(int value){
 SlaveResponse Sensor::getResponse(){
     SlaveResponse response;
     response = Device::getResponse();
-    if(command=="get_value"){
+     if ( command=="get_info"){
+      response.buffer[0]=0x01;
+      Serial.println(response.buffer[0]);
+      response.buffer[1]=0;
+      response.size =2;
+      return response;
+
+    }
+    else if(command=="get_value"){
 
        if (send_value){
        unsigned char* my_value_in_bytes;

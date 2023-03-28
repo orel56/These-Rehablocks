@@ -119,7 +119,7 @@ void setup() {
   Wire.begin();
 
 }
- void loop() {
+/*  void loop() {
 if (change==0){
    data[0]=0x00;
    Serial.printf("Sending command 0x00 to 0x08 device...");
@@ -188,7 +188,7 @@ if (change==0){
           }
   delay(1000);
 
-  }}
+  }} */
 
 /* void loop() {
 
@@ -282,5 +282,14 @@ if (change==0){
     Serial.println(buff[k]);
 
    }*/
+int cpt = 0;
+  void loop(){
+    cpt++;
+    if (cpt==10){
+      setCpuFrequencyMhz(10);
+    }
+    uint32_t freq= getCpuFrequencyMhz();
+    Serial.println(freq);
+    delay(1000);
 
-  
+  }
