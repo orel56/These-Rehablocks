@@ -7,7 +7,7 @@ public :
     DigitalTwin();
     void DT_get(I2Cmaster* I2Cperipheral,DeviceHandler* my_handler);
     void DT_agregate();
-    void DT_analyse();
+    void DT_analyse(DeviceHandler* my_handler);
     void DT_set(I2Cmaster* I2Cperipheral,DeviceHandler* my_handler);
     void DT_working_management();
     bool apearing_demand();

@@ -58,3 +58,7 @@ class Device {
 
 };
 
+class behavior {
+
+
+};

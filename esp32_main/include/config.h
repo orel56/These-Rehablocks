@@ -2,4 +2,4 @@
 
 #define MAX_DEVICE 10
 
-#define INFO_SIZE 2
+#define INFO_SIZE 6

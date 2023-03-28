@@ -36,3 +36,6 @@ class I2Cmaster {
 
     uint8_t ping(uint8_t addr);
 };
+
+unsigned char* int_to_bytesarray(int value, uint8_t size=0);
+int bytesArrayToInt (unsigned char* bytes, unsigned char len);

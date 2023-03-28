@@ -20,9 +20,12 @@ void DigitalTwin::DT_agregate(){
 
 }
 
-void DigitalTwin::DT_analyse(){
-
+void DigitalTwin::DT_analyse(DeviceHandler* my_handler){
+    for (int i = 0; i<my_handler->size;i++){
+        (my_handler->list_device[i])->analyse();
+    }
 }
+
 void DigitalTwin::DT_set(I2Cmaster * I2Cperipheral,DeviceHandler* my_handler){
     I2Cperipheral->i2c_set(my_handler);
     //xaal_tick();

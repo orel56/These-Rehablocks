@@ -19,7 +19,7 @@ public:
   DeviceHandler();
   DeviceHandler(Device** list_device, uint8_t size);
   ~DeviceHandler();
-  void add_new_device(uint8_t addr,uint8_t type);
+  void add_new_device(uint8_t addr,uint8_t type,int other);
   uint8_t ask_free_addr();
   void update_value(uint8_t addr, int value = 0, bool previous=0);
   void put_in_quarantine(uint8_t addr);

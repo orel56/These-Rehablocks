@@ -17,6 +17,28 @@ int search_str(char **list_str, char *str, int size_list)
   return -1;
 }
 
+unsigned char* int_to_bytesarray(int value, uint8_t size){
+
+    static unsigned char bytes[4];
+    for(int i=0;i<4;i++){
+        bytes[i]=(value & (0x000000ff << (2*i*4))) >> 8*i;
+    }
+    return bytes;
+}
+
+int bytesArrayToInt (unsigned char* bytes, unsigned char len){
+    int value =0;
+    int buffer = 0;
+    for (int i=(len-4);i<len;i++){
+        buffer = bytes[i];
+        buffer = buffer<<(i*8);
+        value+=buffer;
+    }
+
+    return value;
+
+}
+
 char *mycommands[6] = {strdup("ping"),
                        strdup("change_addr"),
                        strdup("get_info"),
@@ -102,7 +124,7 @@ void I2Cmaster::apering_process(DeviceHandler *my_handler)
 {
   byte error = 0;
   error = I2Cmaster::ping(0x08);
-
+  int x=0;
   if (!error)
   {
     // 0x08 device received ping
@@ -123,7 +145,8 @@ void I2Cmaster::apering_process(DeviceHandler *my_handler)
         if (!error)
         {
           I2Cmaster::receive_data(new_addr, INFO_SIZE);
-          my_handler->add_new_device(new_addr, this->reponse_buffer.buffer[1]);
+          x=bytesArrayToInt(this->reponse_buffer.buffer,INFO_SIZE);
+          my_handler->add_new_device(new_addr, this->reponse_buffer.buffer[1],x);
         }
       }
     }
@@ -135,6 +158,7 @@ void I2Cmaster::i2c_init(DeviceHandler *my_handler)
   Wire.begin();
 
   std::vector<uint8_t> bus_addrs = this->scan();
+  int x=0;
   for (int k = 0; k < bus_addrs.size(); k++)
   {
     byte error = 0;
@@ -147,8 +171,9 @@ void I2Cmaster::i2c_init(DeviceHandler *my_handler)
 
       if (!error)
       {
-        I2Cmaster::receive_data(bus_addrs[k]);
-        my_handler->add_new_device(bus_addrs[k], this->reponse_buffer.buffer[1]);
+        I2Cmaster::receive_data(bus_addrs[k],INFO_SIZE);
+        x=bytesArrayToInt(this->reponse_buffer.buffer,INFO_SIZE);
+        my_handler->add_new_device(bus_addrs[k], this->reponse_buffer.buffer[1],x);
       }
     }
   }
@@ -172,11 +197,7 @@ void I2Cmaster::i2c_get(DeviceHandler *my_handler)
         this->receive_data(0x0b, 5);
         if (reponse_buffer.buffer[0] == 0x01)
         {
-          for (int i = 1; i < 5; i++)
-          {
-            x = reponse_buffer.buffer[i];
-            x = x << ((i - 1) * 8);
-          }
+          x=bytesArrayToInt(reponse_buffer.buffer,5);
           my_handler->update_value(my_handler->filter_buffer[i], x);
         }
       }
@@ -187,7 +208,7 @@ void I2Cmaster::i2c_get(DeviceHandler *my_handler)
 void I2Cmaster::i2c_set(DeviceHandler *my_handler)
 {
   uint8_t error = 0;
-  uint8_t data[4];
+  uint8_t *data;
   if (!(my_handler->size))
   {
     for (int i = 0; i < my_handler->size; i++)
@@ -196,10 +217,7 @@ void I2Cmaster::i2c_set(DeviceHandler *my_handler)
       {
         if ((my_handler->list_device[i])->to_be)
         {
-          for (int i = 0; i < 4; i++)
-          {
-            data[i] = ((my_handler->list_device[i])->current_value & (0x000000ff << (2 * i * 4))) >> 8 * i;
-          }
+          data=int_to_bytesarray((my_handler->list_device[i])->current_value,4);
           error = I2Cmaster::send_command((my_handler->list_device[i])->addr, "set_value", data, 4, 0x03);
           if (!error)
           {

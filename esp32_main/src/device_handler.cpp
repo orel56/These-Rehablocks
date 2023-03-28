@@ -21,13 +21,13 @@ DeviceHandler::~DeviceHandler(){
     free(this->list_device);
 }
 
-void DeviceHandler::add_new_device(uint8_t addr,uint8_t type){
+void DeviceHandler::add_new_device(uint8_t addr,uint8_t type,int other){
     if (this->size<MAX_DEVICE){
         if(type){
-        this->list_device[this->size]=new Actuator(addr,type);
+        this->list_device[this->size]=new Actuator(addr,type,(uint8_t) other);
         }
         else {
-        this->list_device[this->size]=new Sensor(addr,type);
+        this->list_device[this->size]=new Sensor(addr,type,other);
         }
     }
     this-> size+=1;
