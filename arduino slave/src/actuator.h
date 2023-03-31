@@ -12,5 +12,5 @@ public :
     virtual bool set_value (int value);
     SlaveResponse getResponse();
     int bytesArraytoInt(volatile uint8_t* data, uint8_t len);
-
+    uint8_t expectedReceiveLength(uint8_t forRegister);
 };

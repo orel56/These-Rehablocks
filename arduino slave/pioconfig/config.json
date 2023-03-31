@@ -1,9 +1,8 @@
 {
     "device" : {
-        "sensor" :{
-            "potentiometer" : {
-                "pin!" : "A0",
-                "threshold" : 100
+        "actuator" :{
+            "led" : {
+                "pin!" : "A2"
             }
         }
     },

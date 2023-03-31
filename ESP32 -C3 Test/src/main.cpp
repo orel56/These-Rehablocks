@@ -4,11 +4,13 @@
 
 uint8_t buff[20];
 
-uint8_t data[3];
+uint8_t data[5];
 volatile uint8_t receivedBytes[RECEIVED_COMMAND_MAX_BYTES];
 int val_potar;
-
+int type = 1;
 bool change  = 1;
+
+bool led_state=0;
 
 Tab findAddr;
 
@@ -119,7 +121,8 @@ void setup() {
   Wire.begin();
 
 }
-/*  void loop() {
+
+void loop() {
 if (change==0){
    data[0]=0x00;
    Serial.printf("Sending command 0x00 to 0x08 device...");
@@ -134,8 +137,10 @@ if (change==0){
       data[0]=0x02;
       out= send_command(0x0b,data,1);
       if (out==0){
-        receive_data(0x0b,buff,1);
+        receive_data(0x0b,buff,2);
          if (buff[0]==0x01){
+          Serial.println("here");
+          type=buff[1];
           change=1;}
           else{
             Serial.println("wrong output for get_info");
@@ -162,9 +167,12 @@ if (change==0){
   
   }
   else {
+    if (!type){
+    Serial.println("potentiometer");
     int x=0;
     val_potar=0;
     data[0]=0x03;
+    
     int out= send_command(0x0b,data,1);
     if (out==0){
     receive_data(0x0b,buff,5);
@@ -181,6 +189,36 @@ if (change==0){
   }
       else{
             Serial.println("wrong answer for get_value");
+          }  
+    }
+  else{
+            Serial.println("get_value didn't reach device");
+          }
+  delay(1000);
+
+  }
+  else {
+    Serial.println("Led");
+
+    int x=0;
+    led_state=!led_state;
+    data[0]=0x03;
+    x=led_state;
+    for (int i=1;i<5;i++){
+        data[i]=(x & (0x000000ff << (2*(i-1)*4))) >> 8*(i-1);
+        Serial.println(data[i]);
+    }
+
+    int out= send_command(0x0b,data,5);
+    if (out==0){
+    receive_data(0x0b,buff,1);
+    Serial.println(buff[0]);
+
+    if (buff[0]==0x01){
+      Serial.println("the led might be changed");
+  }
+      else{
+            Serial.println("wrong answer for set_value");
           }    
     }
   else{
@@ -188,7 +226,10 @@ if (change==0){
           }
   delay(1000);
 
-  }} */
+  }
+  }
+  
+  }
 
 /* void loop() {
 
@@ -268,8 +309,7 @@ if (change==0){
 
       }
     }  
-    
-  /* data[0]=0x05;
+   data[0]=0x05;
    int out = send_command(addr,data,1);
    if (out == 0) {
       receive_data(addr,buff,2);
@@ -281,8 +321,8 @@ if (change==0){
     Serial.println("buffer i");
     Serial.println(buff[k]);
 
-   }*/
-int cpt = 0;
+   } */
+/* int cpt = 0;
   void loop(){
     cpt++;
     if (cpt==10){
@@ -292,4 +332,4 @@ int cpt = 0;
     Serial.println(freq);
     delay(1000);
 
-  }
+  } */

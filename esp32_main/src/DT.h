@@ -4,6 +4,7 @@
 
 class DigitalTwin {
 public : 
+    bool check_device_flag;
     DigitalTwin();
     void DT_get(I2Cmaster* I2Cperipheral,DeviceHandler* my_handler);
     void DT_agregate();
@@ -11,6 +12,7 @@ public :
     void DT_set(I2Cmaster* I2Cperipheral,DeviceHandler* my_handler);
     void DT_working_management();
     bool apearing_demand();
+    bool check_device(DeviceHandler* my_handler,I2Cmaster * I2Cperipheral);
 private:
     void DT_update();
 };

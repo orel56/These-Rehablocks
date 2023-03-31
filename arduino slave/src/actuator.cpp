@@ -4,21 +4,36 @@ Actuator::Actuator(){};
 
 void Actuator::process(volatile uint8_t * buffer, uint8_t len){
     Device::process(buffer,len); 
+    this->command=this->mycommands[buffer[0]];
     if (command=="set_value"){
+        Serial.println("command set_value is detected");
       this->set_value(bytesArraytoInt(buffer,len));
           }
     else {
+        Serial.println("command set_value is not detected");
 
     }
 }
 
-bool Actuator::is_setable (int value){
+bool Actuator::is_setable (int value){        
+    Serial.println("wrong is setable...");
+
     return true;
 }
 bool Actuator::set_value (int value){
         return true;
 }
+uint8_t Actuator::expectedReceiveLength(uint8_t forRegister){
+  if (forRegister==0x01){
+    return 2;
+  }
+  else if (forRegister==0x03){
+    Serial.println("for command set_value 5 bytes are expected");
 
+    return 5;
+  }
+  else {return 1;}
+};
 int Actuator::bytesArraytoInt(volatile uint8_t* data,uint8_t len){
     int value =0;
     int buffer = 0;
@@ -27,6 +42,10 @@ int Actuator::bytesArraytoInt(volatile uint8_t* data,uint8_t len){
           buffer = buffer<<((i-1)*8);      
         value+=buffer;
     }
+    Serial.println("extracted value from data received : ");
+    Serial.println(value);
+
+
     return value;
 }
 
