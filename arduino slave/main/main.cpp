@@ -7,14 +7,10 @@
 
 
 void i2cRequestEvent()
-{
-   // get the response (the I2CDevice knows what to say)
-   SlaveResponse resp = I2CDevice->getResponse();
-   // write it to the out buffer
-
-   Wire.write(resp.buffer, resp.size); 
-
+{  
+  I2CDevice->i2cRequest();
 }
+
 void i2cReceiveEvent(int bytesReceived)
 {
   uint8_t msgLen = 0;
@@ -64,15 +60,13 @@ void i2cReceiveEvent(int bytesReceived)
 void setup() {
   // SETUP wire
   pinMode(USR_LED,OUTPUT);
-  pinMode(SDA,INPUT_PULLUP);
-  pinMode(SCL,INPUT_PULLUP);
-  pinMode(PIN_READY,OUTPUT);
+  pinMode(SDAP,INPUT);
+  pinMode(SAP,OUTPUT);
 
   EEPROM.begin();
   Serial.begin(9600);
-
-
-  if ((digitalRead(SDA)==LOW)&&(digitalRead(SCL)==LOW)){
+  //pas LOW plutot du analog read
+  if (analogRead(SDAP)==0){
     I2CDevice->mode="deconnect";
     digitalWrite(USR_LED,LOW);
     pinMode(DECO_BTN,INPUT_PULLUP);
@@ -86,13 +80,13 @@ void setup() {
     if (i2c_addr==0x08){
       I2CDevice->mode="working";
       digitalWrite(USR_LED,HIGH);
-      digitalWrite(PIN_READY,HIGH);
+      digitalWrite(SAP,HIGH);
 
     }
     else{
       I2CDevice->mode="working";
       digitalWrite(USR_LED,LOW);
-    }  Serial.println(EEPROM.read(0x00));
+    } 
 
   }
  
@@ -104,18 +98,8 @@ void setup() {
  * pending commands when they come in.
  */
 void loop() {
-  
 if (I2CDevice->mode == "deconnect"){
   I2CDevice->deconnect();
-
-}
-else if (I2CDevice->mode =="connect")
-{
-  I2CDevice->connect();
-
-}
-else if (I2CDevice->mode =="working") {
-  I2CDevice->tick();
 
 }
 else{

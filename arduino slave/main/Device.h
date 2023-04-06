@@ -17,11 +17,11 @@ class Device {
 
     volatile uint8_t pendingCommand[RECEIVED_COMMAND_MAX_BYTES];
     volatile uint8_t pendingCommandLength = 0;
-    uint8_t my_addr=0x08;
+    uint8_t my_addr;
 
     String mode = "";
 
-    bool deco_btn = 0;
+    bool deco_btn = 1;
     uint8_t connect_follow=0;
     Device();
 
@@ -55,6 +55,7 @@ class Device {
     void deconnect();
     void connect();
     void tick();
+    void i2cRequest();
 
 };
 

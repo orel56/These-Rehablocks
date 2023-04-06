@@ -2,12 +2,12 @@
     "device" : {
         "actuator" :{
             "led" : {
-                "pin!" : "A2"
-            }
+                "pin!" : "A3"
+                        }
         }
     },
     "info" :{
         "data_size" : 8,
-        "usage" : "..."
+        "usage" : ""
     }
 }

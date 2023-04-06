@@ -1,5 +1,7 @@
 #include <stdint.h>
 #include <mat.h>
+
+
 class Device {
 public :
     uint8_t addr;
@@ -33,3 +35,21 @@ public :
 
     ~Actuator(){};
 };
+
+typedef struct list_device {
+    Device* device;
+    struct list_device* next_link=NULL;
+    struct list_device* prev_link=NULL;
+} list_device;
+
+void push(list_device **list_dev,Device* device);
+
+void retreive(list_device **list_dev,uint8_t addr);
+
+Device* access(list_device **list_dev,uint8_t addr);
+
+
+void clear(list_device ** list_dev);
+
+
+
