@@ -7,4 +7,5 @@
 #define DECO_BTN A2
 #define USR_LED A1
 
-#define PIN_READY A11 
+#define SAP 11
+#define SDAP A11

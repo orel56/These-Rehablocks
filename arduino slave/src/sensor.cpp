@@ -3,6 +3,8 @@
 Sensor::Sensor(){}
 
 void Sensor::process(volatile uint8_t * buffer, uint8_t len){
+    Serial.println("processing the command : ");
+    Serial.println(Sensor::mycommands[buffer[0]]);
     Device::process(buffer,len);
     this->command=Sensor::mycommands[buffer[0]];
     if (this->command=="get_value"){
@@ -29,12 +31,14 @@ uint8_t * Sensor::int_to_bytesarray(int value){
 
 SlaveResponse Sensor::getResponse(){
     SlaveResponse response;
+    Serial.println("in get response method of sensor");
     response = Device::getResponse();
      if ( command=="get_info"){
       response.buffer[0]=0x01;
       Serial.println(response.buffer[0]);
-      response.buffer[1]=0;
-      response.size =2;
+      response.buffer[1]=this->id;
+      response.buffer[2]=this->linkId;
+      response.size =3;
       return response;
 
     }

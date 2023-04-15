@@ -2,6 +2,7 @@
 #include <cstring>
 #include <vector>
 #include <config.h>
+#include "Arduino.h"
 
 struct SlaveResponse {
     uint8_t buffer[20]={};
@@ -12,14 +13,16 @@ struct SlaveResponse {
 
 class DeviceHandler {
 public:
-  Device**list_device=NULL;
-  uint8_t filter_buffer[MAX_DEVICE];
+  bool check_device_flag=0;
+
+  list_device *list_dev=NULL;
+  Device* filter_buffer[MAX_DEVICE];
   uint8_t size_buffer;
   uint8_t size;
   DeviceHandler();
-  DeviceHandler(Device** list_device, uint8_t size);
+  //DeviceHandler(list_device * list_dev, uint8_t size);
   ~DeviceHandler();
-  void add_new_device(uint8_t addr,uint8_t type,int other);
+  void add_new_device(uint8_t addr,uint8_t id, uint8_t linkId,int other);
   uint8_t ask_free_addr();
   void update_value(uint8_t addr, int value = 0, bool previous=0);
   void put_in_quarantine(uint8_t addr);

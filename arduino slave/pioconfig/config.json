@@ -1,13 +1,11 @@
 {
     "device" : {
-        "actuator" :{
-            "led" : {
-                "pin!" : "A2"
+        "sensor" :{
+            "potentiometer" : {
+                "pin!" : "A3",
+                "id" : 3,
+                "linkId" : 135                   
             }
-        }
-    },
-    "info" :{
-        "data_size" : 8,
-        "usage" : "..."
-    }
+        } 
+}
 }

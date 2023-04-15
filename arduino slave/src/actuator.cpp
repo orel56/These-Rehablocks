@@ -57,8 +57,9 @@ SlaveResponse Actuator::getResponse(){
     if ( command=="get_info"){
       response.buffer[0]=0x01;
       Serial.println(response.buffer[0]);
-      response.buffer[1]=1;
-      response.size =2;
+      response.buffer[1]=this->id;
+      response.buffer[2]=this->linkId;
+      response.size =3;
       return response;
 
     }

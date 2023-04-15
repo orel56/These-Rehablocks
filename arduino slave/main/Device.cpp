@@ -17,11 +17,6 @@ SlaveResponse Device::getResponse(){
        response.size=1;
        return response;
     }
-    else {
-      response.buffer[0]=0x01;
-      Serial.println(response.buffer[0]);
-      response.size =1;
-    }
     return response;
   
 };
@@ -36,14 +31,18 @@ uint8_t Device::expectedReceiveLength(uint8_t forRegister){
 void Device::process(volatile uint8_t * buffer, uint8_t len){
    this->command=this->mycommands[buffer[0]];
    if ( (command=="change_addr")){
+      Serial.println("command is change addr");
       this->connect_follow++;
       this->changeAddr(buffer[1]);
           }
    else if (( (command=="ping")) && (this->my_addr==0x08)){
+      Serial.println("command is ping and my addr is 0x08 meaning I 'am connecting");
       this->mode="connect";
       this->connect_follow++;
    }
    else if ( (command=="get_info") && (this->mode=="connect")){
+      Serial.println("command is get_info");
+
       this->connect_follow++;
 
    }
@@ -52,17 +51,20 @@ void Device::process(volatile uint8_t * buffer, uint8_t len){
 void Device::doThings(){
 };
 
-Device::Device(){};
+Device::Device(){
+  this->my_addr=EEPROM.read(0x00);
+};
 
 
 void Device::changeAddr(uint8_t addr){
+  Serial.println("changing my addr 0x08 for the new one : ");
+  Serial.println(addr);
   this->my_addr=addr;
   TWAR=addr<<1;
   EEPROM.write(0x00,this->my_addr);
 }
 
 void Device::tick(){
-
  if (pendingCommandLength) {
     // oh my, we've received a command!
     
@@ -72,6 +74,7 @@ void Device::tick(){
     // Here we just do it "real time" for simplicity
 
     // 1) process that command
+    Serial.println("there a new pending command that need to be process");
     process(pendingCommand, pendingCommandLength);
 
     // 2) zero that flag, so we don't process multiple times
@@ -104,7 +107,24 @@ void Device::connect(){
       this->tick();}
   else {
     digitalWrite(USR_LED,LOW);
-    digitalWrite(PIN_READY,LOW);
+    Serial.println("connect end");
+    digitalWrite(SAP,LOW);
     this->mode="working";
   }
+}
+
+void Device::i2cRequest(){
+  if (this->mode =="connect")
+  {
+    this->connect();
+
+  }
+  else if (this->mode =="working") {
+    this->tick();
+  }
+   // get the response (the I2CDevice knows what to say)
+   SlaveResponse resp = this->getResponse();
+   // write it to the out buffer
+
+   Wire.write(resp.buffer, resp.size); 
 }

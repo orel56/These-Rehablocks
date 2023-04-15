@@ -6,8 +6,20 @@ uint8_t buff[20];
 
 uint8_t data[5];
 volatile uint8_t receivedBytes[RECEIVED_COMMAND_MAX_BYTES];
+
+struct Device {
+  int type = 0;
+  int quarantaine=0;
+  int addr=0;
+  int current_value=0;
+};
+
+Device* device_list [2];
+
+
+
 int val_potar;
-int type = 1;
+int type_di = 1;
 bool change  = 1;
 
 bool led_state=0;
