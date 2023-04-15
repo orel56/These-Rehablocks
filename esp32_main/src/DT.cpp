@@ -5,6 +5,7 @@ DigitalTwin::DigitalTwin(){
 };
 
 bool DigitalTwin::apearing_demand(){
+    this->new_device=0;
     return digitalRead(SAP);
 };
 
@@ -16,6 +17,7 @@ void DigitalTwin::DT_get(I2Cmaster * I2Cperipheral,DeviceHandler* my_handler){
 
     //Serial.println("in DT get function");
     if (this->apearing_demand()){
+        this->new_device=1;
         Serial.println("There is a new device connexion tentative");
         I2Cperipheral->apering_process(my_handler);
         Serial.println("apearing done");
@@ -30,6 +32,16 @@ void DigitalTwin::DT_agregate(){
 }
 
 void DigitalTwin::DT_analyse(DeviceHandler* my_handler){
+    if (this->new_device){
+         Device * tmp=access(&(my_handler->list_dev),0x08+my_handler->size);
+         if (tmp->linkId){
+            tmp->linked_dev=access(&(my_handler->list_dev),tmp->linkId,"id");
+            (tmp->linked_dev)->linked_dev=tmp;
+         }
+
+                 
+    }
+
     for (int i = 0; i<my_handler->size;i++){
         access(&(my_handler->list_dev),0x09+i)->analyse();
     }

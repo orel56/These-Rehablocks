@@ -8,11 +8,13 @@ Device::Device(){
     this->to_be=0;
 };
 
-Device::Device(uint8_t addr,uint8_t type){
+Device::Device(uint8_t addr, uint8_t id,uint8_t linkId){
     this->addr=addr;
     this->current_value=0;
     this->quarantine=0;
-    this->type=type;
+    this->id=id;
+    this->linkId=linkId;
+    this->type=id>>7;
     this->to_be=0;
 
 }
@@ -23,11 +25,11 @@ Sensor::Sensor(){
 Actuator::Actuator(){
 };
 
-Sensor::Sensor(uint8_t addr,uint8_t type,int threshold): Device(addr,type){
+Sensor::Sensor(uint8_t addr,uint8_t id,uint8_t linkId,int threshold): Device(addr,id,linkId){
     this->threshold=threshold;
 }
 
-Actuator::Actuator(uint8_t addr,uint8_t type, uint8_t linked): Device(addr,type){
+Actuator::Actuator(uint8_t addr,uint8_t id,uint8_t linkId, uint8_t linked): Device(addr,id,linkId){
     this->linked = linked;
 }
 
@@ -88,17 +90,31 @@ void retreive(list_device **list_dev,uint8_t addr){
     }
 }
 
-Device* access(list_device **list_dev,uint8_t addr){
+Device* access(list_device **list_dev,uint8_t val,const char * attr){
     list_device* tmp=*list_dev;
-    while(tmp){
-        if (((tmp)->device)->addr==addr){
-            return ((tmp)->device);
-            break;
-        }
-        else {
-            tmp=tmp->prev_link;
+    if (attr=="addr"){
+        while(tmp){
+            if (((tmp)->device)->addr==val){
+                return ((tmp)->device);
+                break;
+            }
+            else {
+                tmp=tmp->prev_link;
+            }
         }
     }
+    else if (attr=="id"){
+          while(tmp){
+            if (((tmp)->device)->id==val){
+                return ((tmp)->device);
+                break;
+            }
+            else {
+                tmp=tmp->prev_link;
+            }
+        }
+    }
+
     return NULL;
 }
 

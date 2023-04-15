@@ -158,10 +158,10 @@ void I2Cmaster::apering_process(DeviceHandler *my_handler)
         {
           
 
-          I2Cmaster::receive_data(new_addr, 2);
+          I2Cmaster::receive_data(new_addr, 3);
           // x=bytesArrayToInt(this->reponse_buffer.buffer,INFO_SIZE);
           x = 0;
-          my_handler->add_new_device(new_addr, this->reponse_buffer.buffer[1], x);
+          my_handler->add_new_device(new_addr, this->reponse_buffer.buffer[1],this->reponse_buffer.buffer[2], x);
         }
       }
     }
@@ -192,11 +192,11 @@ void I2Cmaster::i2c_init(DeviceHandler *my_handler)
       
       if (!error)
       {
-        I2Cmaster::receive_data(bus_addrs[k], 2);
+        I2Cmaster::receive_data(bus_addrs[k], 3);
         // x=bytesArrayToInt(this->reponse_buffer.buffer,2);
         x = 0;
         Serial.println("this device will be added in the device handler");
-        my_handler->add_new_device(bus_addrs[k], this->reponse_buffer.buffer[1], x);
+        my_handler->add_new_device(bus_addrs[k], this->reponse_buffer.buffer[1],this->reponse_buffer.buffer[2], x);
       }
     }
   }

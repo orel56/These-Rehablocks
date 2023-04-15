@@ -21,16 +21,16 @@ DeviceHandler::~DeviceHandler()
     free(this->list_dev);
 }
 
-void DeviceHandler::add_new_device(uint8_t addr, uint8_t type, int other)
+void DeviceHandler::add_new_device(uint8_t addr, uint8_t id, uint8_t linkId, int other)
 {
     if (this->size < MAX_DEVICE)
     {
         Serial.println("there is enought place for the device");
-        if (type)
+        if (id>>7)
         {
             Serial.println("Device is an actuator");
 
-            push(&(this->list_dev), new Actuator(addr, type, (uint8_t)other));
+            push(&(this->list_dev), new Actuator(addr, id,linkId, (uint8_t) other));
             Serial.println("Device has been saved");
             Serial.println("Device type : ");
             Serial.println(access(&list_dev, addr)->type);
@@ -39,7 +39,7 @@ void DeviceHandler::add_new_device(uint8_t addr, uint8_t type, int other)
         }
         else
         {
-            push(&(this->list_dev), new Sensor(addr, type, other));
+            push(&(this->list_dev), new Sensor(addr, id,linkId, other));
             Serial.println("Device has been saved");
             Serial.println("Device type : ");
             Serial.println(access(&list_dev, addr)->type);

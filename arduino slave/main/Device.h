@@ -15,6 +15,9 @@ class Device {
     volatile uint8_t receivedBytes[RECEIVED_COMMAND_MAX_BYTES];
     volatile uint8_t receivedByteIdx = 0;
 
+    uint8_t id=0;
+    uint8_t linkId=0;
+
     volatile uint8_t pendingCommand[RECEIVED_COMMAND_MAX_BYTES];
     volatile uint8_t pendingCommandLength = 0;
     uint8_t my_addr;
