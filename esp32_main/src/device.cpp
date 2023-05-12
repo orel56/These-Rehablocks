@@ -8,38 +8,15 @@ Device::Device(){
     this->to_be=0;
 };
 
-Device::Device(uint8_t addr, uint8_t id,uint8_t linkId){
+Device::Device(uint8_t addr, uint8_t id,uint8_t subscription){
     this->addr=addr;
     this->current_value=0;
     this->quarantine=0;
     this->id=id;
-    this->linkId=linkId;
+    this->subscription=subscription;
     this->type=id>>7;
     this->to_be=0;
 
-}
-
-Sensor::Sensor(){
-};
-
-Actuator::Actuator(){
-};
-
-Sensor::Sensor(uint8_t addr,uint8_t id,uint8_t linkId,int threshold): Device(addr,id,linkId){
-    this->threshold=threshold;
-}
-
-Actuator::Actuator(uint8_t addr,uint8_t id,uint8_t linkId, uint8_t linked): Device(addr,id,linkId){
-    this->linked = linked;
-}
-
-void Sensor::analyse(){
-    this->to_be=(abs(this->previous_value - this->current_value)>this->threshold);
-}
-
-void Actuator::analyse(){
-    this->to_be=true;
-    this->current_value=1;
 }
 
 void push(list_device **list_dev,Device* device){

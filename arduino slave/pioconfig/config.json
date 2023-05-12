@@ -1,11 +1,13 @@
 {
     "device" : {
-        "sensor" :{
+
             "potentiometer" : {
                 "pin!" : "A3",
-                "id" : 3,
-                "linkId" : 135                   
-            }
-        } 
+                "threshold" : 100,
+                "id" : 3
+            },
+        "info" : {
+            "subscription" : 0
+        }
 }
 }

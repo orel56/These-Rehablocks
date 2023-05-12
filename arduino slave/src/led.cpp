@@ -1,51 +1,70 @@
 #include "led.h"
+Led::Led(int pin)
+{
+    this->pin = pin;
+    this->id == 0b10000001;
+    int i = 0;
+    pinMode(pin, OUTPUT);
+    this->elapsed_time = millis()
 
-Led::Led(int pin){
-    this->pin=pin;
-    this->id==0b10000001;
-    this->linkId=0;
-
-    pinMode(pin,OUTPUT);
+#ifdef LED_FREQUENCY
+                             this->frequency = LED_FREQUENCY;
+#endif
 }
 
-Led::Led(int pin, int id){
-    this->pin=pin;
-    this->id=id;
-    this->linkId=0;
-
-    pinMode(pin,OUTPUT);
+Led::Led(int pin, int id)
+{
+    this->pin = pin;
+    this->id = id;
+    int i = 0;
+    pinMode(pin, OUTPUT);
+    this->elapsed_time = millis();
+#ifdef LED_FREQUENCY
+    this->frequency = LED_FREQUENCY;
+#endif
 }
 
-Led::Led(int pin,int id, int linkId){
-    this->pin=pin;
-    this->id=id;
-    this->linkId=linkId;
-    pinMode(pin,OUTPUT);
+Led::Led()
+{
 }
 
-Led::Led(){
-
-}
-
-bool Led::is_setable(int value){
-    Serial.println("checking if is setable");
-    if (this->current_value!=value){
-        this->current_value=value;
-        is_set=true;
-        return true;
+void Led::behaviour1()
+{
+    if (this->mouv)
+    {
+        this->timer = 0;
+        this->elapsed_time = millis();
     }
-    else {
-        is_set=false;
-        return false;
+    else
+    {
+        this->timer = millis() - elapsed_time;
+        if (this->timer > ((unsigned long)this->max_time * 60000))
+        {
+            if (this->t >= 0.5)
+            {
+            }
+            else 
+            {
+                this->t = (this->timer-((unsigned long)this->max_time * 60000))/ (period * 1000);
+                this->current_value = !(this->current_value);
+                digitalWrite(this->pin, this->current_value);
+
+
+            }
+        }
     }
 }
-bool Led::set_value(int value){
-    Serial.println("setting led to value : ");
-    Serial.println(value);
 
-
-    if (is_setable(value)){
-        digitalWrite(this->pin,value);
+void Led::behaviour2()
+{
+    this->timer = millis();
+    if (this->mouv)
+    {
+        this->timer = 0;
     }
-    return false;
+    if (this->timer == this->maxtime)
+    {
+        this->current_value = 1;
+        digitalWrite(this->pin, this->current_value);
+    }
 }

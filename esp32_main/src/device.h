@@ -11,32 +11,11 @@ public :
     bool quarantine; 
     bool to_be =0;
     uint8_t id;
-    uint8_t linkId;
-    Device* linked_dev=NULL;
+    uint8_t subscription;
     Device();
-    Device(uint8_t addr, uint8_t id,uint8_t linkId);
+    Device(uint8_t addr, uint8_t id,uint8_t subscription);
 
     virtual void analyse(){};
-};
-
-class Sensor : public Device {
-public : 
-    int threshold =0;
-    Sensor();
-    Sensor(uint8_t addr, uint8_t id,uint8_t linkId,int threshold);
-    virtual void analyse();
-
-    ~Sensor(){};
-};
-
-class Actuator : public Device {
-public : 
-    uint8_t linked;
-    Actuator();
-    Actuator(uint8_t addr,uint8_t id,uint8_t linkId,uint8_t linked);
-    virtual void analyse();
-
-    ~Actuator(){};
 };
 
 typedef struct list_device {

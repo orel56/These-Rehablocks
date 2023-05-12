@@ -5,12 +5,11 @@ import json
 
 id=''
 
-code_dictionnary = {"actuator" : '1',
-                    "sensor" : '0',
-                     "led" : '000',
-                     "motor" : '001',
-                     "potentiometer": '000',
-                     "accelerometer" : '001',}
+code_dictionnary = {
+                     "led" : '1000',
+                     "buzzer" : '1001',
+                     "potentiometer": '0000',
+                     "accelerometer" : '0001',}
 
 ini_template = """
 [env:%s]
@@ -61,6 +60,8 @@ def appendFlags(entries, name):
         if type(value) == str:
             if key[-1] == '!':
                 flags += "    -D%s=%s\n" % ((name+'_'+key[:-1]).upper(), value)
+            else :
+                flags += "    -D%s=%s\n" % ((name+'_'+key).upper(), int(value))
         else:
             flags += "    -D%s=%s\n" % ((name+'_'+key).upper(), value)
     flags += "    \n"
@@ -72,6 +73,7 @@ for config in configs:
     ini = ''
     srcs = ''
     flags = ''
+    id=''
     config_name = os.path.basename(config).split('.')[0]
     config_names.append(config_name)
 
@@ -80,28 +82,26 @@ for config in configs:
             config = json.load(f)
             if 'device' in config and config['device'] is not None:
                 for device in config['device']:
-                    if not os.path.exists('src/%s.cpp' % device):
-                        print('! Module not found: %s' % device)
-                        exit(1)
-                    srcs += "    +<%s.cpp>\n" % device
-
-                    id=id+code_dictionnary[device]
-                    for name in config['device'][device]:
-                        if not os.path.exists('src/%s.cpp' % name):
-                            print('! Module not found: %s' % name)
-                            exit(1)
-                        srcs += "    +<%s.cpp>\n" % name
-                        id=id+code_dictionnary[name]
-                        if not ("id" in config['device'][device][name]): 
-                            flags += "    ; From %s\n" % name
-                            flags += appendFlags(config['device'][device][name], name)
+                    if device =="info" :
+                            flags += "    ; From %s\n" % device
+                            flags += appendFlags(config['device'][device], device)
                             # print(flags)
-                        else : 
-                            id='0b'+id+to_four_bits(config['device'][device][name]["id"])
-                            print(id)
-                            config['device'][device][name]["id"]=int(id,2)
-                            flags += "    ; From %s\n" % name
-                            flags += appendFlags(config['device'][device][name], name)
+                    else : 
+
+                        if not os.path.exists('src/%s.cpp' % device):
+                            print('! Module not found: %s' % device)
+                            exit(1)
+                        srcs += "    +<%s.cpp>\n" % device
+
+                        id=id+code_dictionnary[device]
+                        if (config['device'][device]["id"]) : 
+                            id='0b'+id+to_four_bits(config['device'][device]["id"])
+                            config['device'][device]["id"]=int(id,2)
+
+                        flags += "    ; From %s\n" % device
+                        flags += appendFlags(config['device'][device], device)
+                        # print(flags)
+
             ini = ini_template % (config_name, srcs, flags)
             ini_filename = 'pioconfig/platformio_ini/%s.ini' % config_name
 
