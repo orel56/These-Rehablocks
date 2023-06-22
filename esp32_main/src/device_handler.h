@@ -22,7 +22,7 @@ public:
   DeviceHandler();
   //DeviceHandler(list_device * list_dev, uint8_t size);
   ~DeviceHandler();
-  void add_new_device(uint8_t addr,uint8_t id, uint8_t linkId,int other);
+  void add_new_device(uint8_t addr,uint8_t id, uint8_t subscription,uint8_t behaviour);
   uint8_t ask_free_addr();
   void update_value(uint8_t addr, int value = 0, bool previous=0);
   void put_in_quarantine(uint8_t addr);

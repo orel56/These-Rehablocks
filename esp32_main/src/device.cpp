@@ -8,7 +8,7 @@ Device::Device(){
     this->to_be=0;
 };
 
-Device::Device(uint8_t addr, uint8_t id,uint8_t subscription){
+Device::Device(uint8_t addr, uint8_t id,uint8_t subscription, uint8_t behaviour){
     this->addr=addr;
     this->current_value=0;
     this->quarantine=0;
@@ -16,7 +16,7 @@ Device::Device(uint8_t addr, uint8_t id,uint8_t subscription){
     this->subscription=subscription;
     this->type=id>>7;
     this->to_be=0;
-
+    this->current_behaviour=behaviour;
 }
 
 void push(list_device **list_dev,Device* device){

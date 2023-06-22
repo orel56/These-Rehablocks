@@ -2,13 +2,16 @@
 Led::Led(int pin)
 {
     this->pin = pin;
-    this->id == 0b10000001;
-    int i = 0;
+    this->id = 0b10000001;
     pinMode(pin, OUTPUT);
-    this->elapsed_time = millis()
+    this->elapsed_time = millis();
 
 #ifdef LED_FREQUENCY
-                             this->frequency = LED_FREQUENCY;
+    this->frequency = LED_FREQUENCY;
+    this->period = 1/LED_FREQUENCY;
+#endif
+#ifdef LED_TIME
+    this->max_time=LED_TIME;
 #endif
 }
 
@@ -16,11 +19,14 @@ Led::Led(int pin, int id)
 {
     this->pin = pin;
     this->id = id;
-    int i = 0;
     pinMode(pin, OUTPUT);
     this->elapsed_time = millis();
 #ifdef LED_FREQUENCY
     this->frequency = LED_FREQUENCY;
+    this->period = 1/LED_FREQUENCY;
+#endif
+#ifdef LED_TIME
+    this->max_time=LED_TIME;
 #endif
 }
 
@@ -34,37 +40,57 @@ void Led::behaviour1()
     {
         this->timer = 0;
         this->elapsed_time = millis();
+        this->current_value=0;
     }
     else
     {
-        this->timer = millis() - elapsed_time;
-        if (this->timer > ((unsigned long)this->max_time * 60000))
-        {
-            if (this->t >= 0.5)
-            {
-            }
-            else 
-            {
-                this->t = (this->timer-((unsigned long)this->max_time * 60000))/ (period * 1000);
-                this->current_value = !(this->current_value);
-                digitalWrite(this->pin, this->current_value);
-
-
-            }
+        this->timer = (millis() - elapsed_time)/1e3;
+        int blink_flag=this->timer-((unsigned long)this->max_time);
+        if (blink_flag>0)
+        {   
+            float t = fmod(blink_flag,this->period)/ (this->period);
+            this->current_value=(t<0.5) ? 1 : 0;
         }
     }
+    digitalWrite(this->pin, this->current_value);
 }
 
 void Led::behaviour2()
 {
-    this->timer = millis();
+    this->timer = millis()-this->elapsed_time;
     if (this->mouv)
     {
         this->timer = 0;
+        this->elapsed_time = millis();
+        this->current_value = 0;
     }
-    if (this->timer == this->maxtime)
+    else {
+    this->timer = (millis() - elapsed_time)/1e3;
+    int blink_flag=this->timer-((unsigned long)this->max_time);
+    if (blink_flag>0 && this->current_value==0)
     {
         this->current_value = 1;
-        digitalWrite(this->pin, this->current_value);
+    }
+    }
+    digitalWrite(this->pin, this->current_value);
+
+}
+
+void Led::update_param(){
+    if(this->pendingCommand[1]==1){
+        this->frequency=bytesArraytoInt(pendingCommand,5,2);
+        this->period=1/this->frequency;
+    }
+}
+
+void Led::update_subject(){
+    switch (pendingCommand[2])
+    {
+    case 1:
+        this->mouv=pendingCommand[3];
+        break;
+    default:
+        this->mouv=0;
+        break;
     }
 }

@@ -76,7 +76,7 @@ class Device {
     virtual void behaviour3 ();
     void (Device::*behaviour)() =nullptr;
 
-    void Behav();
+    void behav();
 
     virtual void update_behav(uint8_t i=0);
 

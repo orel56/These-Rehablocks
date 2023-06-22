@@ -60,7 +60,7 @@ if (I2CDevice->mode ==1){
   I2CDevice->deconnect();
 }
 else if(I2CDevice->mode==2){
-  I2CDevice->tick();
+  I2CDevice->behav();
 }
 else if (I2CDevice->mode==3){
   Serial.println("Deconexion done, device can be unpluged and used");

@@ -12,8 +12,9 @@ public :
     bool to_be =0;
     uint8_t id;
     uint8_t subscription;
+    uint8_t current_behaviour;
     Device();
-    Device(uint8_t addr, uint8_t id,uint8_t subscription);
+    Device(uint8_t addr, uint8_t id,uint8_t subscription, uint8_t behaviour);
 
     virtual void analyse(){};
 };

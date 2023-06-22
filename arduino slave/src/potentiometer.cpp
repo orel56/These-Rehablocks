@@ -5,14 +5,12 @@ Potentiometer::Potentiometer(int adc_pin, int threshold){
     this->adc_pin=adc_pin;
     this->threshold=threshold;
     this->id=0b10000001;
-    int i=0;
 }
 
 Potentiometer::Potentiometer(int adc_pin, int threshold,int id){
     this->adc_pin=adc_pin;
     this->threshold=threshold;
     this->id=(uint8_t) id;
-    int i=0;
 }
 
 
