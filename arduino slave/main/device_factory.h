@@ -8,10 +8,10 @@
     #endif
 #elif POTENTIOMETER 
     #include "potentiometer.h"
-    #ifdef POTENTIOMETER_ID 
-        Potentiometer * I2CDevice = new Potentiometer(POTENTIOMETER_PIN,POTENTIOMETER_THRESHOLD,POTENTIOMETER_ID);
-    #else
-        Potentiometer * I2CDevice = new Potentiometer(POTENTIOMETER_PIN,POTENTIOMETER_THRESHOLD);
+    Potentiometer * I2CDevice = new Potentiometer(POTENTIOMETER_PIN,POTENTIOMETER_THRESHOLD,POTENTIOMETER_ID);
 
-    #endif
+#elif ACCELEROMETER
+    #include "accelerometer.h"
+    Accelerometer * I2CDevice = new Potentiometer(ACCELEROMETER_ID);
+
 #endif

@@ -17,6 +17,7 @@ public:
     Led();
     void update_param();
     void update_subject();
+    void get_status();
 
     void behaviour1();
     void behaviour2();

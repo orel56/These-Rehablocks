@@ -45,6 +45,9 @@ SlaveResponse Device::getResponse()
     response.buffer[3] = this->current_behaviour;
     response.size = 4;
   }
+  else if (command == 3){
+    response=this->status;
+  }
   else
   {
     response.size = 1;
@@ -98,7 +101,12 @@ void Device::process()
   }
   else
   {
-    if (command == 0x04) // publish subjects
+    if (command==0x03)
+    {
+      this->acknowledge=1;
+      this->get_status();
+    }
+    else if (command == 0x04) // publish subjects
     {
       this->acknowledge = this->grap_subject();
     }
@@ -348,3 +356,6 @@ void Device::update_behav(uint8_t i)
 void Device::update_param()
 { // use pendingcommand to access the data aquired from master
 }
+void Device::get_status(){};
+
+void Device::setup(){};

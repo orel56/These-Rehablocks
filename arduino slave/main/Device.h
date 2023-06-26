@@ -19,6 +19,7 @@ class Device {
     uint8_t acknowledge=0; // acknowledge byte value
     uint8_t current_behaviour=1;
 
+    SlaveResponse status;
 
     uint8_t command;
     volatile uint8_t receivedBytes[RECEIVED_COMMAND_MAX_BYTES];
@@ -43,7 +44,7 @@ class Device {
      *   - uint8_t * buffer;
      *   - uint8_t size;
      */
-    virtual SlaveResponse getResponse();
+    SlaveResponse getResponse();
     /*
      * expectedReceiveLength(REGISTERID)
      * Returns the number of bytes to receive for a given
@@ -78,9 +79,13 @@ class Device {
 
     void behav();
 
+    virtual void setup();
+    
     virtual void update_behav(uint8_t i=0);
 
     virtual void update_param();
+
+    virtual void get_status();
 
     void update_global_subjects();
 

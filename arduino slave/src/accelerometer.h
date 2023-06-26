@@ -3,17 +3,18 @@
 
 class Accelerometer : public Device {
 public: 
-    int elapsed_time =0;
     int threshold=100;
+    float rot_x, rot_y, rot_z;
 
     Accelerometer(int id);
     Accelerometer();
     void update_param();
     void update_subject();
+    void get_status();
+    void setup();
 
+    void read_accelero();
     void behaviour1();
     void behaviour2();
 
-    bool set_value(int value);
-    bool is_setable(int value);
 };

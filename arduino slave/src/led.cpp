@@ -94,3 +94,12 @@ void Led::update_subject(){
         break;
     }
 }
+
+void Led::get_status(){
+    SlaveResponse resp;
+    resp.buffer[0]=this->acknowledge;
+    resp.buffer[1]=0;
+    resp.buffer[2]=uint8_t (this->current_value);
+    resp.size=3;
+    this->status=resp;
+}

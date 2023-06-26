@@ -23,6 +23,7 @@ void setup() {
 
   EEPROM.begin();
   Serial.begin(9600);
+  I2CDevice->setup();
   //pas LOW plutot du analog read
   if (analogRead(SDAP)==0){
     I2CDevice->mode=1;
