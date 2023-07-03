@@ -4,6 +4,7 @@
 #include <EEPROM.h>
 #include <Arduino.h>
 
+uint8_t val=0;
 
 void i2cRequestEvent()
 {  
@@ -57,14 +58,20 @@ void setup() {
  * pending commands when they come in.
  */
 void loop() {
+bool btn_val = digitalRead(DECO_BTN);
 if (I2CDevice->mode ==1){
-  I2CDevice->deconnect();
+  I2CDevice->behav();
 }
 else if(I2CDevice->mode==2){
+  if (btn_val){
+    I2CDevice->deconnect();
+  }
   I2CDevice->behav();
 }
 else if (I2CDevice->mode==3){
-  Serial.println("Deconexion done, device can be unpluged and used");
+
+  val=!val;
+  digitalWrite(USR_LED,val);
   delay(1000);
 }
 }

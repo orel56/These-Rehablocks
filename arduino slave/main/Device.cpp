@@ -40,10 +40,12 @@ SlaveResponse Device::getResponse()
   response.buffer[0] = this->acknowledge;
   if (command == 2)
   {
-    response.buffer[1] = this->id;
-    response.buffer[2] = this->subscription;
-    response.buffer[3] = this->current_behaviour;
-    response.size = 4;
+    uint8_t * bytes=int_to_bytesarray(this->id);
+    response.buffer[1] = bytes[0];
+    response.buffer[2] = bytes[1];
+    response.buffer[3] = this->subscription;
+    response.buffer[4] = this->current_behaviour;
+    response.size = 5;
   }
   else if (command == 3){
     response=this->status;
@@ -99,7 +101,7 @@ void Device::process()
       this->connect_follow++;
     }
   }
-  else
+  else if (this->mode==2)
   {
     if (command==0x03)
     {
@@ -125,6 +127,17 @@ void Device::process()
       this->acknowledge = 1;
     }
   }
+  else if (this->mode==1){
+    if (command == 0x00)
+    {
+        EEPROM.write(0x00, 0x08);
+
+        digitalWrite(USR_LED, LOW);
+        digitalWrite(SAP, LOW);
+        this->mode=3;
+    }
+  }
+
 };
 
 uint8_t Device::grap_subject()
@@ -229,15 +242,10 @@ void Device::tick()
 
 void Device::deconnect()
 {
-  bool btn_val = digitalRead(DECO_BTN);
-
-  if ((btn_val != this->deco_btn) && btn_val)
-  {
-    EEPROM.write(0x00, 0x08);
     digitalWrite(USR_LED, HIGH);
+    digitalWrite(SAP, HIGH);
     Serial.println("addr erased, 0x08 wrote in 0x00 eeprom address");
-    this->mode = 3;
-  }
+    this->mode = 1;
 }
 
 void Device::connect()

@@ -11,7 +11,7 @@ struct SlaveResponse {
 class Device {
   public:
     int time = 0;
-    uint8_t id=0;
+    uint16_t id=0;
     uint8_t subscription=0;
     int current_value =0;
     int previous_value =0;
@@ -29,7 +29,6 @@ class Device {
     uint8_t my_addr;
 
     uint8_t mode = 0;
-    bool deco_btn = 1;
     uint8_t connect_follow=0;
 
 
@@ -64,7 +63,7 @@ class Device {
      * process(BUFFER, BUFLEN)
      * Process incoming data from master. 
      */
-    virtual void process( );
+    void process( );
     void changeAddr(uint8_t addr);
 
     void deconnect();

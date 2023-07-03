@@ -131,7 +131,6 @@ void request(){}
 void setup() {
   Serial.begin(9600);
   Wire.begin();
-
 }
 
 void loop() {

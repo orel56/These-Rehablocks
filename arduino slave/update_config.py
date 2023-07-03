@@ -5,11 +5,17 @@ import json
 
 id=''
 
-code_dictionnary = {
-                     "led" : '1000',
-                     "buzzer" : '1001',
-                     "potentiometer": '0000',
-                     "accelerometer" : '0001',}
+typecode_dictionnary = {
+                     "led" : '100000',
+                     "buzzer" : '100100',
+                     "potentiometer": '000000',
+                     "accelerometer" : '000010',}
+familly_dictionnary = {
+                     "led" : '100',
+                     "buzzer" : '100',
+                     "potentiometer": '010',
+                     "accelerometer" : '010',}
+subfamilly_dictionnary = {}
 
 ini_template = """
 [env:%s]
@@ -93,7 +99,7 @@ for config in configs:
                             exit(1)
                         srcs += "    +<%s.cpp>\n" % device
 
-                        id=id+code_dictionnary[device]
+                        id=id+typecode_dictionnary[device] + familly_dictionnary[device] + "000"
                         if (config['device'][device]["id"]) : 
                             id='0b'+id+to_four_bits(config['device'][device]["id"])
                             config['device'][device]["id"]=int(id,2)
