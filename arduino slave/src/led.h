@@ -1,14 +1,24 @@
-#include "actuator.h"
+#include "Device.h"
+#include <time.h>
 
-class Led : public Actuator {
+class Led : public Device {
 public: 
     int pin=0;
-    float frequency=0.0;
+    float frequency=1;
+    float period=1;
+    uint8_t max_time=15;
+    int elapsed_time =0;
+    int timer=0;
+    double t=0.0;
+    bool mouv =0;
+
     Led(int pin);
     Led(int pin,int id);
-    Led(int pin,int id, int linkId);
-
     Led();
-    bool set_value(int value);
-    bool is_setable(int value);
+    void update_param();
+    void update_subject();
+    void get_status();
+
+    void behaviour1();
+    void behaviour2();
 };

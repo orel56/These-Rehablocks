@@ -1,47 +1,45 @@
 #include "potentiometer.h"
 
-Potentiometer::Potentiometer(int adc_pin, int threshold){
-    this->adc_pin=adc_pin;
-    this->threshold=threshold;
-    this->id=0b10000001;
-    this->linkId=0;
-}
-
-Potentiometer::Potentiometer(int adc_pin, int threshold,int id){
-    this->adc_pin=adc_pin;
-    this->threshold=threshold;
-    this->id=(uint8_t) id;
-    this->linkId=0;
-}
-
-Potentiometer::Potentiometer(int adc_pin, int threshold,int id, int linkId){
-    this->adc_pin=adc_pin;
-    this->threshold=threshold;
-    this->id=(uint8_t) id;
-    this->linkId=(uint8_t)linkId;
-}
-
 Potentiometer::Potentiometer(){
 
 }
-bool Potentiometer::get_value(){
-    int current_val = 0;
-    current_val=analogRead(adc_pin);
-    if(check_value(current_val)){
-        this->current_value=current_val;
-        this->send_value=true;
 
-    }
-    else{
-        this->send_value=false;
-    }
-    return true;
 
-};
-bool Potentiometer::check_value(int value){
-    if (abs(this->current_value-value)>this->threshold){
-        return true;
-    }
-    return false;
-};
+Potentiometer::Potentiometer(int adc_pin, int threshold, int id){
+    this->adc_pin = adc_pin;
+    this->id = id;
+    this->threshold=threshold;
+    pinMode(adc_pin, INPUT);
+}
 
+void Potentiometer::behaviour1(){
+    int read =analogRead(adc_pin);
+    if(abs(this->current_value - read)>this->threshold){
+        this->previous_value=this->current_value;
+        this->current_value=read;
+    }
+}
+
+void Potentiometer::update_param(){
+     if(this->pendingCommand[1]==1){
+        this->threshold=bytesArraytoInt(pendingCommand,5,2);
+    }
+}
+
+void Potentiometer::update_subject(){
+   
+}
+
+void Potentiometer::get_status(){
+    SlaveResponse resp;
+    resp.buffer[0]=this->acknowledge;
+    resp.buffer[1]=0;
+    uint8_t* value = int_to_bytesarray (this->current_value);
+    resp.buffer[2] = value[0];
+    resp.buffer[3] = value[1];
+    resp.buffer[4] = value[2];
+    resp.buffer[5] = value[3];
+    resp.size=6;
+    this->status=resp;
+
+}

@@ -1,46 +1,41 @@
 #include <device.h>
 
+struct subject {
+    uint8_t id;
+    int value;
+    int prev_value;
+    uint8_t is_produced_by[10];
+    uint8_t are_subscribed[10];
+    bool to_be_sent;
+};
+
+typedef struct subject Subject;
+
+
+
 Device::Device(){
     this->addr=0x08;
     this->current_value=0;
-    this->quarantine=0;
     this->type=2;
-    this->to_be=0;
 };
 
-Device::Device(uint8_t addr, uint8_t id,uint8_t linkId){
+Device::Device(uint8_t addr, int id,uint8_t subscription, uint8_t behaviour){
     this->addr=addr;
     this->current_value=0;
-    this->quarantine=0;
     this->id=id;
-    this->linkId=linkId;
-    this->type=id>>7;
-    this->to_be=0;
-
+    this->extract_id_info();
+    this->subscription=subscription;
+    this->current_behaviour=behaviour;
 }
 
-Sensor::Sensor(){
-};
 
-Actuator::Actuator(){
-};
-
-Sensor::Sensor(uint8_t addr,uint8_t id,uint8_t linkId,int threshold): Device(addr,id,linkId){
-    this->threshold=threshold;
+void Device::extract_id_info(){
+    this->type=(this->id)>>15;
+    this->sub_type=(this->id)>>10 & 0b011111;
+    this->familly=(this->id)>>7 & 0b000000111;
+    this->sub_fam=(this->id)>>4 & 0b000000000111;
 }
 
-Actuator::Actuator(uint8_t addr,uint8_t id,uint8_t linkId, uint8_t linked): Device(addr,id,linkId){
-    this->linked = linked;
-}
-
-void Sensor::analyse(){
-    this->to_be=(abs(this->previous_value - this->current_value)>this->threshold);
-}
-
-void Actuator::analyse(){
-    this->to_be=true;
-    this->current_value=1;
-}
 
 void push(list_device **list_dev,Device* device){
     list_device *element = (list_device *) malloc(sizeof(list_device));
