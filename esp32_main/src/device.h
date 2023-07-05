@@ -5,16 +5,28 @@
 class Device {
 public :
     uint8_t addr;
-    uint8_t type;
+    uint8_t status;
     int current_value;
     int previous_value;
-    bool quarantine; 
-    bool to_be =0;
-    uint8_t id;
+
+    float x,y,prev_x,prev_y;
+   // bool quarantine; 
+
+    int id;
+    uint8_t type;
+    uint8_t sub_type;
+
+    uint8_t familly;
+    uint8_t sub_fam;
+
+
     uint8_t subscription;
+
     uint8_t current_behaviour;
     Device();
-    Device(uint8_t addr, uint8_t id,uint8_t subscription, uint8_t behaviour);
+    Device(uint8_t addr, int id,uint8_t subscription, uint8_t behaviour);
+
+    void extract_id_info();
 
     virtual void analyse(){};
 };

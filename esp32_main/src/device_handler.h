@@ -22,11 +22,12 @@ public:
   DeviceHandler();
   //DeviceHandler(list_device * list_dev, uint8_t size);
   ~DeviceHandler();
-  void add_new_device(uint8_t addr,uint8_t id, uint8_t subscription,uint8_t behaviour);
+  void add_new_device(uint8_t addr,uint8_t * buffer);
   uint8_t ask_free_addr();
-  void update_value(uint8_t addr, int value = 0, bool previous=0);
+  void update_value(uint8_t addr, SlaveResponse resp);
   void put_in_quarantine(uint8_t addr);
   void delete_device(uint8_t addr);
   void filter_list (const char* filter);
+  Device* access_dev(uint8_t addr);
 
 };
