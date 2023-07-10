@@ -13,9 +13,9 @@ void setup() {
 
 void loop() {
   mytwin->DT_get(I2Cperipheral,my_handler);
-  //mytwin->DT_agregate();
-  //mytwin->DT_analyse(my_handler);
-  //mytwin->DT_set(I2Cperipheral,my_handler);
+  mytwin->DT_agregate(my_handler);
+  mytwin->DT_analyse(my_handler);
+  mytwin->DT_set(I2Cperipheral,my_handler);
   //mytwin->DT_working_management();
   //DT_get --> réccupère les infos de xaal et de i2c
   //DT_aggregate --> aggrège les données réccupéerée précédemment et les anciennes données 

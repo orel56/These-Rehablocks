@@ -7,14 +7,14 @@ id=''
 
 typecode_dictionnary = {
                      "led" : '100000',
-                     "buzzer" : '100100',
+                     "buzzer" : '100001',
                      "potentiometer": '000000',
-                     "accelerometer" : '000010',}
+                     "accelerometer" : '000001',}
 familly_dictionnary = {
-                     "led" : '100',
-                     "buzzer" : '100',
-                     "potentiometer": '010',
-                     "accelerometer" : '010',}
+                     "led" : '000',
+                     "buzzer" : '000',
+                     "potentiometer": '001',
+                     "accelerometer" : '001',}
 subfamilly_dictionnary = {}
 
 ini_template = """

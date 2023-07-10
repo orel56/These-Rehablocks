@@ -34,9 +34,6 @@ int bytesArrayToInt(unsigned char *bytes, unsigned char len)
 }
 
 
-uint8_t size_list = 6;
-
-uint16_t hex_val;
 
 I2Cmaster::I2Cmaster(){};
 
@@ -104,7 +101,6 @@ void I2Cmaster::apering_process(DeviceHandler *my_handler)
 {
   Serial.println("apearing the new device");
   byte error = 0;
-  int x = 0;
     // 0x08 device received ping
     uint8_t new_addr = my_handler->ask_free_addr();
     Serial.println("ping has been received, changing addr 0x08 for :  ");
@@ -130,8 +126,7 @@ void I2Cmaster::apering_process(DeviceHandler *my_handler)
           
 
           I2Cmaster::receive_data(new_addr, 5);
-          // x=bytesArrayToInt(this->reponse_buffer.buffer,INFO_SIZE);
-          x = 0;
+
           my_handler->add_new_device(new_addr, this->reponse_buffer.buffer);
         }
       }
@@ -169,7 +164,6 @@ void I2Cmaster::i2c_init(DeviceHandler *my_handler)
   Wire.begin();
   Wire.setTimeOut(100);
   std::vector<uint8_t> bus_addrs = this->scan();
-  int x = 0;
   Serial.println("Number of device found : ");
   Serial.println(bus_addrs.size());
   for (int k = 0; k < bus_addrs.size(); k++)
@@ -183,13 +177,12 @@ void I2Cmaster::i2c_init(DeviceHandler *my_handler)
     if (!error)
     {
 
-      error = I2Cmaster::send_command(bus_addrs[k], "get_info", {}, 0);
+      error = I2Cmaster::send_command(bus_addrs[k],0x02, {}, 0);
       
       if (!error)
       {
         I2Cmaster::receive_data(bus_addrs[k], 3);
-        // x=bytesArrayToInt(this->reponse_buffer.buffer,2);
-        x = 0;
+
         Serial.println("this device will be added in the device handler");
         my_handler->add_new_device(bus_addrs[k],this->reponse_buffer.buffer);
       }
@@ -232,29 +225,65 @@ void I2Cmaster::i2c_get_status(DeviceHandler *my_handler)
 };
 
 void I2Cmaster::i2c_set(DeviceHandler *my_handler)
-{
-  Serial.println("in set function");
-  my_handler->filter_list("actuator");
-  uint8_t error = 0;
-  uint8_t *data;
-  if (!(my_handler->size))
-  {
-    for (int i = 0; i < my_handler->size_buffer; i++)
+{   uint8_t error = 0;
+    uint8_t *data;
+    Subject *sub;
+    Device *dev;
+    std::list<uint8_t>::iterator Iter;
+    uint8_t available_subjects = (my_handler->list_subject).size();
+
+
+    for (uint8_t k = 0; k < available_subjects; k++)
     {
-        
-        if ((my_handler->filter_buffer[i])->to_be)
-        {
-          data = int_to_bytesarray((my_handler->filter_buffer[i])->current_value, 4);
-          error = I2Cmaster::send_command((my_handler->filter_buffer[i])->addr, "set_value", data, 4, 0x03);
-          if (!error)
-          {
-            this->receive_data((my_handler->filter_buffer[i])->addr, 1);
-            if (reponse_buffer.buffer[0] == 0x00)
-            {
-              my_handler->update_value((my_handler->filter_buffer[i])->addr, 0, true);
-            }
+        sub = my_handler->access_subject(k, -1);
+        if (sub->to_be_sent){
+          for (uint8_t i=0;i<my_handler->size;i++){
+            dev=my_handler->access_dev(0,i);
+            if(dev->is_subscribe(sub->id)){
+              data = this->generate_data_subject(sub);
+              error = this->send_command(dev->addr,0x04, data, 6);
+              if (!error)
+              {
+                delay(10);
+                this->receive_data(dev->addr, 1);
+                if ((this->reponse_buffer).buffer[0]){
+                  Serial.println("acknowledge de la part de la device");
+                }
+                else {
+                  Serial.println("la device n'a pas acknowledge le sujet");
+                }
+              }
+              else{
+                  Serial.println("Subject data wasn't received by device : ");
+                  Serial.println(dev->addr);
+              }
+
           }
+
+
         }
     }
-  }
+}
+    uint8_t datas[6]={1,1,1,2,3,0};
+    error=this->send_command(0x00,0x04,data,6);
+    if (!error){
+      Serial.println("general subject id 1 was sent without error");
+    }
+    else {
+      Serial.println("An error occured when sending general subject id 1");
+
+    }
+} 
+
+uint8_t* I2Cmaster::generate_data_subject(Subject* sub){
+  static uint8_t data[6];
+  uint8_t *buff;
+  data[0]=0;
+  data[1]=sub->id;
+  buff=int_to_bytesarray(sub->value,4);
+  data[2]=buff[0];
+  data[3]=buff[1];
+  data[4]=buff[2];
+  data[5]=buff[3];
+  return data;
 }

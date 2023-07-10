@@ -1,5 +1,20 @@
 #include <stdint.h>
 #include <mat.h>
+#include <list>
+
+
+struct subject {
+    uint8_t id;
+    int value;
+    int prev_value;
+    std::list<uint8_t> is_produced_by;
+    std::list<uint8_t> are_subscribe;
+    std::list<uint8_t> substitute;
+    bool to_be_sent;
+    bool already_update;
+};
+
+typedef struct subject Subject;
 
 
 class Device {
@@ -27,24 +42,10 @@ public :
     Device(uint8_t addr, int id,uint8_t subscription, uint8_t behaviour);
 
     void extract_id_info();
-
+    bool is_subscribe(uint8_t id);
     virtual void analyse(){};
 };
 
-typedef struct list_device {
-    Device* device;
-    struct list_device* next_link=NULL;
-    struct list_device* prev_link=NULL;
-} list_device;
-
-void push(list_device **list_dev,Device* device);
-
-void retreive(list_device **list_dev,uint8_t addr);
-
-Device* access(list_device **list_dev,uint8_t val,const char * attr="addr");
-
-
-void clear(list_device ** list_dev);
 
 
 

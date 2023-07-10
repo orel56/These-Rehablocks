@@ -33,6 +33,7 @@ class I2Cmaster {
     void i2c_get_status(DeviceHandler* my_handler);
     void i2c_set(DeviceHandler* my_handler);
     void i2c_init(DeviceHandler* my_handler);
+    uint8_t* generate_data_subject(Subject* sub);
 
     uint8_t ping(uint8_t addr);
 };

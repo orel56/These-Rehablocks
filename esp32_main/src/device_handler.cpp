@@ -1,5 +1,9 @@
 #include "device_handler.h"
 
+std::list<knowledge> database_type;
+std::list<knowledge> database_fam;
+
+
 int bytesArraytoInt(uint8_t *data, uint8_t len, uint8_t begin_val)
 {
   int value = 0;
@@ -18,9 +22,10 @@ int bytesArraytoInt(uint8_t *data, uint8_t len, uint8_t begin_val)
 
 DeviceHandler::DeviceHandler()
 {
-    this->list_dev = NULL;
     this->size_buffer = 0;
     this->size = 0;
+    init_database_fam(database_fam);
+    init_database_type(database_type);
 }
 
 /* DeviceHandler::DeviceHandler(list_device* list_dev, uint8_t size){
@@ -34,7 +39,6 @@ DeviceHandler::DeviceHandler()
 
 DeviceHandler::~DeviceHandler()
 {
-    free(this->list_dev);
 }
 
 void DeviceHandler::add_new_device(uint8_t addr,uint8_t * buffer)
@@ -51,28 +55,101 @@ void DeviceHandler::add_new_device(uint8_t addr,uint8_t * buffer)
         tmp = tmp << ((2-1) * 8);
         id += tmp;
 
-
-        push(&(this->list_dev), new Device(addr, id,subscription, behaviour));
-        Serial.println("Device has been saved");
-        Serial.println("Device type : ");
-        Serial.println(access(&list_dev, addr)->type);
-        Serial.println("Device addr : ");
-        Serial.println(access(&list_dev, addr)->addr);
-        Serial.println("Device id : ");
-        Serial.println(access(&list_dev, addr)->id);
-        Serial.println("Device subscriptions : ");
-        Serial.println(access(&list_dev, addr)->subscription);
-        Serial.println("Device subscriptions : ");
-        Serial.println(access(&list_dev, addr)->current_behaviour);
+        (this->list_device).push_back(new Device(addr, id,subscription, behaviour));
+        this->update_subjects();
     }
     this->size += 1;
 };
+
+void DeviceHandler::update_subjects(){
+    uint8_t subscriptions = ((this->list_device).back())->subscription;
+    uint8_t id_sub=0;
+    if (subscriptions){
+        for (uint8_t i=0;i<8;i++){
+            id_sub=subscriptions & (0b10000000 >> i);
+            if(id_sub){
+                Subject* sub=this->access_subject(-1,id_sub);
+                if (sub !=NULL){
+                    sub->are_subscribe.push_back(((this->list_device).back())->addr);
+                }
+                else{
+                    this->add_new_subject(id_sub);
+                    sub=(this->list_subject).back();
+                    sub->are_subscribe.push_back(((this->list_device).back())->addr);
+                }
+            }            
+        }
+    }
+    std::list<uint8_t> product;
+    std::list<knowledge>::iterator Iter; 
+    for (Iter = (database_type).begin(); Iter != database_type.end(); Iter++){
+        if ((*Iter).value==((this->list_device).back())->type){
+            product=(*Iter).ids;
+            break;
+
+        }
+    }
+    std::list<Subject*>::iterator Iter2; 
+    std::list<uint8_t>::iterator Iter3; 
+    for (Iter2 = (this->list_subject).begin(); Iter2 != (this->list_subject).end(); Iter2++){
+        id_sub=(*Iter2)->id;
+        for (Iter3 = product.begin(); Iter3 != product.end(); Iter3++){
+            if(id_sub==(*Iter3)){
+                ((*Iter2)->is_produced_by).push_back(((this->list_device).back())->addr);
+                break;
+            }
+    }    
+}
+}
+
+void DeviceHandler::add_new_subject(uint8_t id){
+    (this->list_subject).push_back(new Subject);
+    ((this->list_subject).back())->id=id;
+    ((this->list_subject).back())->value=0;
+    ((this->list_subject).back())->prev_value=0;
+    ((this->list_subject).back())->to_be_sent=0;
+    std::list<knowledge>::iterator Iter; 
+    for (Iter = (database_fam).begin(); Iter != database_fam.end(); Iter++){
+        if ((*Iter).value== id){
+            ((this->list_subject).back())->substitute=(*Iter).ids;
+            break;
+
+        }
+            }
+}
+
+Subject* DeviceHandler::access_subject(int8_t position,int8_t id){
+    std::list<Subject*>::iterator Iter; 
+    if (id!=-1){
+    for (Iter = (this->list_subject).begin(); Iter != this->list_subject.end(); Iter++){
+        if ((*Iter)->id== id){
+            return *Iter;
+        }
+    }
+    }
+    else {
+    int i=0;
+    for (Iter = (this->list_subject).begin(); Iter != this->list_subject.end(); Iter++){
+        if (i==position){
+            return *Iter;
+        }
+        i++;
+    }
+
+    }
+    return NULL;
+}
 
 uint8_t DeviceHandler::ask_free_addr()
 {
     if (this->size == 0)
     {
         return 0x09;
+    }
+    else if (this->next_addr!=0){
+        uint8_t buf = this->next_addr;
+        this->next_addr=0;
+        return buf;
     }
     return 0x09 + this->size;
 };
@@ -83,9 +160,9 @@ void DeviceHandler::filter_list(const char *filter)
     Device *tmp = NULL;
     if (!(strcmp(filter, "sensor")))
     {
-        for (int i = 0; i < this->size; i++)
+        for (uint8_t i = 0; i < this->size; i++)
         {
-            tmp = access(&list_dev, 0x09 + i);
+            tmp = this->access_dev(0x09 + i);
             if (tmp->type == 0)
             {
                 this->filter_buffer[i] = tmp;
@@ -95,9 +172,9 @@ void DeviceHandler::filter_list(const char *filter)
     }
     else if (!(strcmp(filter, "actuator")))
     {
-        for (int i = 0; i < this->size; i++)
+        for (uint8_t i = 0; i < this->size; i++)
         {
-            tmp = access(&list_dev, 0x09 + i);
+            tmp = this->access_dev(0x09 + i);
             if (tmp->type == 1)
             {
                 this->filter_buffer[i] = tmp;
@@ -107,8 +184,25 @@ void DeviceHandler::filter_list(const char *filter)
     }
 }
 
-Device * DeviceHandler::access_dev(uint8_t i){
-    return access(&list_dev, 0x09+i);
+Device * DeviceHandler::access_dev(uint8_t addr, int8_t position){
+    std::list<Device*>::iterator Iter; 
+    if (position==-1){
+    for (Iter = (this->list_device).begin(); Iter != this->list_device.end(); Iter++){
+        if ((*Iter)->addr== addr){
+            return *Iter;
+        }
+    }
+    }
+    else {
+        int i=0;
+        for (Iter = (this->list_device).begin(); Iter != this->list_device.end(); Iter++){
+        if (i==position){
+            return *Iter;
+        }
+        i++;
+    }
+    }
+    return NULL;
 }
 
 void DeviceHandler::update_value(uint8_t addr, SlaveResponse resp)
@@ -117,7 +211,7 @@ void DeviceHandler::update_value(uint8_t addr, SlaveResponse resp)
     Serial.println(addr);
     Device *tmp = NULL;
     int buf=0;
-    tmp = access(&list_dev, addr);
+    tmp = this->access_dev(addr);
     if (tmp)
     {
         if (resp.buffer[0]==2)
@@ -159,7 +253,14 @@ void DeviceHandler::update_value(uint8_t addr, SlaveResponse resp)
 
 void DeviceHandler::delete_device(uint8_t addr)
 {
-    retreive(&list_dev, addr);
+    std::list<Device*>::iterator Iter; 
+    for (Iter = (this->list_device).begin(); Iter != this->list_device.end(); Iter++){
+        if ((*Iter)->addr== addr){
+            (this->list_device).erase(Iter);
+            this->next_addr=addr;
+            break;
+        }
+    }    
     this->size -= 1;
     this->check_device_flag = 0;
 }

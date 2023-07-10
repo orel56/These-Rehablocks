@@ -9,7 +9,7 @@ public :
     uint8_t comportement = 0;
 
     void DT_get(I2Cmaster* I2Cperipheral,DeviceHandler* my_handler);
-    void DT_agregate();
+    void DT_agregate(DeviceHandler *my_handler);
     void DT_analyse(DeviceHandler* my_handler);
     void DT_set(I2Cmaster* I2Cperipheral,DeviceHandler* my_handler);
     void DT_working_management();
