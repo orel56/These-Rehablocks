@@ -8,31 +8,17 @@
 #include <Wire.h>
 #include "EEPROM.h"
 
-int bytesArraytoInt(volatile uint8_t *data, uint8_t len, uint8_t begin_val)
+Device::Device()
 {
-  int value = 0;
-  int buffer = 0;
-  for (int i = begin_val; i < len; i++)
-  {
-    buffer = data[i];
-    buffer = buffer << ((i - begin_val) * 8);
-    value += buffer;
-  }
-  Serial.println("extracted value from data received : ");
-  Serial.println(value);
+  this->my_addr = EEPROM.read(0x00);
 
-  return value;
-}
+  this->init_received_subject();
+  this->init_produced_subject();
 
-uint8_t *int_to_bytesarray(int value)
-{
-  static unsigned char bytes[sizeof(value)];
-  for (unsigned int i = 0; i < sizeof(value); i++)
-  {
-    bytes[i] = (value & (0x000000ff << (2 * i * 4))) >> 8 * i;
-  }
-  return bytes;
-}
+#ifdef INFO
+  this->subscription = INFO_SUBSCRIPTION;
+#endif
+};
 
 SlaveResponse Device::getResponse()
 {
@@ -40,15 +26,16 @@ SlaveResponse Device::getResponse()
   response.buffer[0] = this->acknowledge;
   if (command == 2)
   {
-    uint8_t * bytes=int_to_bytesarray(this->id);
+    uint8_t *bytes = intToBytesArray(this->id);
     response.buffer[1] = bytes[0];
     response.buffer[2] = bytes[1];
     response.buffer[3] = this->subscription;
     response.buffer[4] = this->current_behaviour;
     response.size = 5;
   }
-  else if (command == 3){
-    response=this->status;
+  else if (command == 3)
+  {
+    response = this->status;
   }
   else
   {
@@ -101,11 +88,11 @@ void Device::process()
       this->connect_follow++;
     }
   }
-  else if (this->mode==2)
+  else if (this->mode == 2)
   {
-    if (command==0x03)
+    if (command == 0x03)
     {
-      this->acknowledge=1;
+      this->acknowledge = 1;
       this->get_status();
     }
     else if (command == 0x04) // publish subjects
@@ -127,17 +114,17 @@ void Device::process()
       this->acknowledge = 1;
     }
   }
-  else if (this->mode==1){
+  else if (this->mode == 1)
+  {
     if (command == 0x00)
     {
-        EEPROM.write(0x00, 0x08);
+      EEPROM.write(0x00, 0x08);
 
-        digitalWrite(USR_LED, LOW);
-        digitalWrite(SAP, LOW);
-        this->mode=3;
+      digitalWrite(USR_LED, LOW);
+      digitalWrite(SAP, LOW);
+      this->mode = 3;
     }
   }
-
 };
 
 uint8_t Device::grap_subject()
@@ -194,17 +181,20 @@ void Device::update_subject()
 {
 }
 
-Device::Device()
+void Device::init_received_subject()
 {
-  this->my_addr = EEPROM.read(0x00);
-#ifdef INFO
-  this->subscription = INFO_SUBSCRIPTION;
-#ifdef INFO_BEHAVIOUR
-  this->update_behav(INFO_BEHAVIOUR);
-#endif
-
-#endif
-};
+  int n = sizeof(this->subscription);
+  int id_sub = 0;
+  for (int i = 0; i < n; i++)
+  {
+    id_sub = this->subscription & (0b10000000 >> i);
+    if (id_sub)
+    {
+      this->received_subject_nbr++;
+      this->receivedSubjects[received_subject_nbr - 1] = new_subject(id_sub);
+    }
+  }
+}
 
 void Device::changeAddr(uint8_t addr)
 {
@@ -242,10 +232,10 @@ void Device::tick()
 
 void Device::deconnect()
 {
-    digitalWrite(USR_LED, HIGH);
-    digitalWrite(SAP, HIGH);
-    Serial.println("addr erased, 0x08 wrote in 0x00 eeprom address");
-    this->mode = 1;
+  digitalWrite(USR_LED, HIGH);
+  digitalWrite(SAP, HIGH);
+  Serial.println("addr erased, 0x08 wrote in 0x00 eeprom address");
+  this->mode = 1;
 }
 
 void Device::connect()
@@ -329,7 +319,7 @@ void Device::i2cReceive(int bytes)
 void Device::behaviour1(){};
 void Device::behaviour2(){};
 void Device::behaviour3(){};
-void Device::behav() { (this->*behaviour)(); }
+void Device::behav() { (this->*behaviour)(); this->produce_subjects();}
 
 void Device::update_behav(uint8_t i)
 {
@@ -367,3 +357,9 @@ void Device::update_param()
 void Device::get_status(){};
 
 void Device::setup(){};
+
+void Device::init_produced_subject(){
+
+}
+
+void Device::produce_subjects(){}

@@ -2,20 +2,9 @@
 import os
 import glob
 import json
-
+import dic
 id=''
 
-typecode_dictionnary = {
-                     "led" : '100000',
-                     "buzzer" : '100001',
-                     "potentiometer": '000000',
-                     "accelerometer" : '000001',}
-familly_dictionnary = {
-                     "led" : '000',
-                     "buzzer" : '000',
-                     "potentiometer": '001',
-                     "accelerometer" : '001',}
-subfamilly_dictionnary = {}
 
 ini_template = """
 [env:%s]
@@ -27,7 +16,7 @@ build_flags = ${env.build_flags}
 %s
 """
 
-configs = glob.glob('pioconfig/*.json')
+configs = glob.glob('pioconfig/config.json')
 config_names = []
 changed = False
 
@@ -55,21 +44,25 @@ def to_four_bits(id) :
             x='0'+x
     return x
 
-def appendFlags(entries, name):
-    flatten(entries)
+def appendFlags(entries, name,val=-1):
+    if val==-1 :
+        flatten(entries)
 
     flags = ''
     flags += "    -D%s=%s\n" % ((name).upper(),"1")
 
     for key in entries:
         value = entries[key]
-        if type(value) == str:
-            if key[-1] == '!':
-                flags += "    -D%s=%s\n" % ((name+'_'+key[:-1]).upper(), value)
-            else :
-                flags += "    -D%s=%s\n" % ((name+'_'+key).upper(), int(value))
-        else:
-            flags += "    -D%s=%s\n" % ((name+'_'+key).upper(), value)
+        if val==-1 :
+            if type(value) == str:
+                if key[-1] == '!':
+                    flags += "    -D%s=%s\n" % ((name+'_'+key[:-1]).upper(), value)
+                else :
+                    flags += "    -D%s=%s\n" % ((name+'_'+key).upper(), int(value))
+            else:
+                flags += "    -D%s=%s\n" % ((name+'_'+key).upper(), value)
+        else : 
+            flags += "    -D%s=%s\n" % ((name+'_'+key).upper(), val)
     flags += "    \n"
 
     return flags
@@ -89,9 +82,18 @@ for config in configs:
             if 'device' in config and config['device'] is not None:
                 for device in config['device']:
                     if device =="info" :
-                            flags += "    ; From %s\n" % device
-                            flags += appendFlags(config['device'][device], device)
-                            # print(flags)
+                        for info_key in config['device']["info"] : 
+                            if info_key=="subscription" : 
+                                subscrip = 0;
+                                print(len(config['device']["info"]))
+                                for sub_key in config['device']["info"]["subscription"] :
+                                    sub=config['device']["info"]["subscription"][sub_key]
+                                    subscrip += int(dic.subject_dictionnary[sub],2)
+                                flags += "    ; From %s\n" % device
+                                flags += appendFlags(config['device'][device], device, subscrip)
+
+
+                                # print(flags).
                     else : 
 
                         if not os.path.exists('src/%s.cpp' % device):
@@ -99,7 +101,7 @@ for config in configs:
                             exit(1)
                         srcs += "    +<%s.cpp>\n" % device
 
-                        id=id+typecode_dictionnary[device] + familly_dictionnary[device] + "000"
+                        id=id+dic.typecode_dictionnary[device] + dic.familly_dictionnary[device] + "000"
                         if (config['device'][device]["id"]) : 
                             id='0b'+id+to_four_bits(config['device'][device]["id"])
                             config['device'][device]["id"]=int(id,2)

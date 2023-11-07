@@ -1,5 +1,5 @@
 #include <accelerometer.h>
-#include <Adafruit_MPU6050.h>
+/* #include <Adafruit_MPU6050.h>
 #include <Adafruit_Sensor.h>
 #include <Wire.h>
 
@@ -82,14 +82,12 @@ void Accelerometer::get_status(){
     SlaveResponse resp;
     resp.buffer[0]=this->acknowledge;
     resp.buffer[1]=0;
-    int rot_x_int = reinterpret_cast<int&>(this->rot_x);
-    uint8_t* value = int_to_bytesarray(rot_x_int);
+    uint8_t* value = floatToBytesArray(this->rot_x);
     resp.buffer[2] = value[0];
     resp.buffer[3] = value[1];
     resp.buffer[4] = value[2];
     resp.buffer[5] = value[3];
-    rot_x_int = reinterpret_cast<int&>(this->rot_y);
-    value = int_to_bytesarray(rot_x_int);
+    value = floatToBytesArray(this->rot_y);
     resp.buffer[6] = value[0];
     resp.buffer[7] = value[1];
     resp.buffer[8] = value[2];
@@ -97,4 +95,4 @@ void Accelerometer::get_status(){
     resp.size=10;
     this->status=resp;
 
-}
+} */

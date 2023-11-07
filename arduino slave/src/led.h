@@ -19,6 +19,9 @@ public:
     void update_subject();
     void get_status();
 
+    void init_produced_subject();
+    void produce_subjects();
+
     void behaviour1();
     void behaviour2();
 };

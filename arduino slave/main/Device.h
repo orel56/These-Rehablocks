@@ -2,6 +2,7 @@
 
 #include "Arduino.h"
 #include "config.h"
+#include "Subject.h"
 struct SlaveResponse {
     uint8_t buffer[20]={};
     uint8_t size=0;
@@ -15,7 +16,6 @@ class Device {
     uint8_t subscription=0;
     int current_value =0;
     int previous_value =0;
-    uint8_t status=0;
     uint8_t acknowledge=0; // acknowledge byte value
     uint8_t current_behaviour=1;
 
@@ -31,10 +31,15 @@ class Device {
     uint8_t mode = 0;
     uint8_t connect_follow=0;
 
+    Subject * producedSubjects[MAX_SUBJECT];
+    int produced_subject_nbr;
+
+    int received_subject_nbr;
+    Subject * receivedSubjects[MAX_SUBJECT];
 
     Device();
 
-    /*
+    /*[PRODUCED_SUBJECT_NUMBER
      * getResponse -- returns an appropriate buffer, 
      * and its length, according to whatever commands 
      * have been received prior, or defaults.
@@ -89,11 +94,12 @@ class Device {
     void update_global_subjects();
 
     uint8_t grap_subject( );
+
+    void init_received_subject();
+    virtual void init_produced_subject();
+    virtual void produce_subjects();
     virtual void update_subject();
 
     bool is_subscribe();
 
 };
-
-uint8_t * int_to_bytesarray(int value);
-int bytesArraytoInt(volatile uint8_t* data,uint8_t len,uint8_t begin_val);

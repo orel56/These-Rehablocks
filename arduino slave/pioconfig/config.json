@@ -4,9 +4,12 @@
             "potentiometer" : {
                 "pin!" : "A3",
                 "threshold" : 100,
-                "id" : 3
+                "id" : 3,
+                "behaviour": 1
             },
-        "info" : {
-            "subscription" : 0        }
+    "info" : {
+        "subscription" : {
+            "1" : "led_status"
+        }        }
 }
 }
