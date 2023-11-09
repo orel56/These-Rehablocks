@@ -29,8 +29,6 @@ void setup()
   // pas LOW plutot du analog read
   byte i2c_addr;
   i2c_addr = EEPROM.read(0x00);
-  delay(10000);
-  Serial.println(i2c_addr);
   Wire.begin(i2c_addr);
   Wire.onRequest(i2cRequestEvent);
   Wire.onReceive(i2cReceiveEvent);
@@ -56,10 +54,13 @@ void setup()
 void loop()
 {
   bool btn_val = !digitalRead(DECO_BTN);
-  Serial.println(btn_val);
   delay(2000);
-
- if (I2CDevice->mode == 1)
+  if (I2CDevice->mode == 0)
+  {
+    Serial.println("waiting for connexion");
+    I2CDevice->behav();
+  }
+ else if (I2CDevice->mode == 1)
   {
     Serial.println("I'am waiting for ping dude");
 
@@ -69,8 +70,6 @@ void loop()
   {  
     if (btn_val)
     {
-      Serial.println("value is 1 donc on déconnecte");
-
       I2CDevice->deconnect();
     }
     I2CDevice->behav();

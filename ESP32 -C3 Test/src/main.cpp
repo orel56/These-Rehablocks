@@ -1,346 +1,60 @@
-#include <Arduino.h>
-#include <Wire.h>
-#include <config.h>
+#include <routinesTests.h>
 
-uint8_t buff[20];
+int (*test)() = nullptr;
 
-uint8_t data[5];
-volatile uint8_t receivedBytes[RECEIVED_COMMAND_MAX_BYTES];
+int end = -1;
 
-struct Device {
-  int type = 0;
-  int quarantaine=0;
-  int addr=0;
-  int current_value=0;
-};
+unsigned long begin_time = 0;
 
-Device* device_list [2];
+unsigned long end_time = 0;
 
+unsigned long spent_time = 0;
 
+void handle(){};
 
-int val_potar;
-int type_di = 1;
-bool change  = 1;
-
-bool led_state=0;
-
-Tab findAddr;
-
-slaveList listSlave;
-
-int send_command(uint8_t addr,uint8_t * datas,const uint8_t bytes) {
-  Wire.beginTransmission(addr);
-  //Serial.println(datas[0]);
-  for (int i=0; i<bytes;i++){
-    //Serial.print(datas[i]);
-    Wire.write(data[i]);
-
-  }
-  
-  int out=Wire.endTransmission();
-
-  return out;
-}
-
-void receive_data(uint8_t addr,uint8_t * data_buffer, uint8_t bytesToBeReceived){
-    const uint8_t bytesReceived=Wire.requestFrom(addr,bytesToBeReceived);
-    for (int i=0; i<bytesReceived;i++){
-        uint8_t dataRead=Wire.read();
-        data_buffer[i]=dataRead;
-    }
-
-}
-
-/* bool scan(Tab *slaveAddr){
-  byte error, address;
-  int chg=1;
-  Tab newAddr;
-  Serial.println("Scanning...");
-
-  newAddr.size=0;
-  for(address = 8; address < 127; address++ ) 
-  {
-    // The i2c_scanner uses the return value of
-    // the Write.endTransmisstion to see if
-    // a device did acknowledge to the address.
-
-    Wire.beginTransmission(address);
-    error = Wire.endTransmission();
-
-    if (error == 0)
-
-    {
-      Serial.print("I2C device found at address 0x");
-      if (address<16) 
-        Serial.print("0");
-      Serial.print(address,HEX);
-      Serial.println("  !");
-      newAddr.addrs[newAddr.size]=address;
-      newAddr.size++;
-    }
-    else if (error==4) 
-    {
-      Serial.print("Unknown error at address 0x");
-      if (address<16) 
-        Serial.print("0");
-      Serial.println(address,HEX);
-    }    
-  }
-  Serial.println("on sort ");
-
-  if(slaveAddr->size <= newAddr.size){
-    chg=memcmp(newAddr.addrs,slaveAddr->addrs,slaveAddr->size);
-  }
-  else {
-    chg=memcmp(newAddr.addrs,slaveAddr->addrs,newAddr.size);
-  }
-
-  *slaveAddr=newAddr;
-
-  return chg;
-}; */
-
-
-/* void receive_ready(int bytes){
- for (int i = 0; i < bytes; i++)
-  {
-    // stick that byte in our receive buffer
-  receivedBytes[i] = Wire.read();
-  Serial.println(receivedBytes[i]);
-  }
-
-  if (receivedBytes[0]==26){
-    change=scan(&findAddr);
-  }
-
-} */
-
-void request(){}
-
-
-/* bool checkAddr(uint8_t addr,slaveList slaves){
-  for (int k=0;k<slaves.size;k++){
-    if (slaves.list[k].addr==addr){
-      return true;
-    }
-  }
-  return false;
-} */
-
-
-void setup() {
+void setup()
+{
   Serial.begin(9600);
   Wire.begin();
+#ifdef TEST
+  if (TEST == 1)
+  {
+    test = &test_connexion;
+  }
+  else if (TEST == 2)
+  {
+    test = &test_connexion_deconnexion;
+  }
+#else
+  Serial.println("TEST is not define");
+  test = &(handle);
+#endif
 }
+void loop()
+{
 
-void loop() {
-if (change==0){
-   data[0]=0x00;
-   Serial.printf("Sending command 0x00 to 0x08 device...");
-   int out = send_command(0x08,data,1);
-   if (out == 0) {
-    data[0]=0x01;
-    data[1]=0x0b;
-    out= send_command(0x08,data,2);
-    if (out==0){
-    receive_data(0x0b,buff,1);
-    if (buff[0]==0x01){
-      data[0]=0x02;
-      out= send_command(0x0b,data,1);
-      if (out==0){
-        receive_data(0x0b,buff,2);
-         if (buff[0]==0x01){
-          Serial.println("here");
-          type=buff[1];
-          change=1;}
-          else{
-            Serial.println("wrong output for get_info");
-          }
-     }
-        else{
-            Serial.println("get_info didn't reach device");
-          }
-    
+  delay(10000);
+  if (end == -1)
+  {
+    begin_time = millis();
+    end = (*test)();
+    end_time = millis();
+
+    spent_time = end_time - begin_time;
+    Serial.print("test ended in : ");
+    Serial.print(spent_time);
+    Serial.println(" ms");
+
+    Serial.print("It went : ");
+
+    if (!end)
+    {
+      Serial.println("bad");
     }
-    else{
-            Serial.println("wrong output for change_addr");
-          }
-
-   }
-    else{
-            Serial.println("change_addr didn't reach device");
-          }
-   delay(100);
-  }          
-  else{
-            Serial.println("ping didn't reach device");
-          }
-  
-  }
-  else {
-    if (!type){
-    Serial.println("potentiometer");
-    int x=0;
-    val_potar=0;
-    data[0]=0x03;
-    
-    int out= send_command(0x0b,data,1);
-    if (out==0){
-    receive_data(0x0b,buff,5);
-    Serial.println(buff[0]);
-
-    if (buff[0]==0x01){
-        for (int i=1;i<5;i++){
-          x = buff[i];
-          x = x<<((i-1)*8);
-          val_potar+=x;
-      }
-
-      Serial.println(val_potar);
-  }
-      else{
-            Serial.println("wrong answer for get_value");
-          }  
+    else
+    {
+      Serial.println("good");
     }
-  else{
-            Serial.println("get_value didn't reach device");
-          }
-  delay(1000);
-
+    Serial.println("######################################################");
   }
-  else {
-    Serial.println("Led");
-
-    int x=0;
-    led_state=!led_state;
-    data[0]=0x03;
-    x=led_state;
-    for (int i=1;i<5;i++){
-        data[i]=(x & (0x000000ff << (2*(i-1)*4))) >> 8*(i-1);
-        Serial.println(data[i]);
-    }
-
-    int out= send_command(0x0b,data,5);
-    if (out==0){
-    receive_data(0x0b,buff,1);
-    Serial.println(buff[0]);
-
-    if (buff[0]==0x01){
-      Serial.println("the led might be changed");
-  }
-      else{
-            Serial.println("wrong answer for set_value");
-          }    
-    }
-  else{
-            Serial.println("get_value didn't reach device");
-          }
-  delay(1000);
-
-  }
-  }
-  
-  }
-
-/* void loop() {
-
-  if (!cpt){
-    Serial.print("loop");
-    change=scan(&findAddr);
-  if (change){
-    Serial.println(findAddr.size);
-    for(int k=0;k<findAddr.size;k++){
-      if (!checkAddr(findAddr.addrs[k],listSlave))
-      {
-        slave newslave;
-        newslave.addr=findAddr.addrs[k];
-        data[0]=0x05;
-        int out = send_command(newslave.addr,data,1);
-        if (out == 0) {
-            receive_data(newslave.addr,buff,2);
-            newslave.type=buff[1];
-        }
-        else {
-          Serial.println("error with slave : ");
-          Serial.println(newslave.addr);
-          Serial.println("new slave does not respond");
-        }
-
-        listSlave.list[listSlave.size + 1]=newslave;
-        listSlave.size++;
-      }
-    }
-  }
-  else {
-    Serial.println("everything is fine");
-  }
-  cpt++;
-  }
-  else{
-    cpt++;
-    if (cpt==100000){
-      cpt=0;
-    }
-  }
-  for(int k=0;k<listSlave.size;k++){
-      if (listSlave.list[k].type){
-        data[0]=0x02;
-        int out = send_command(listSlave.list[k].addr,data,1);
-        if (out == 0) {
-            receive_data(listSlave.list[k].addr,buff,2);
-            val_potar= buff[1]<<8;
-            val_potar=val_potar | ((uint16_t) buff[0]);     
-            Serial.println(val_potar);   
-            }
-
-        else {
-          Serial.println("error with slave : ");
-          Serial.println(listSlave.list[k].addr);
-          Serial.println("new slave does not respond");
-        }
-      }
-      else {
-        if(val_potar>200){
-          data[0]=0x03;
-        }
-        else {
-          data[0]=0x04;
-
-        }
-        int out = send_command(listSlave.list[k].addr,data,1);
-        if (out == 0) {
-            receive_data(listSlave.list[k].addr,buff,1);  
-            }
-
-        else {
-          Serial.println("error with slave : ");
-          Serial.println(listSlave.list[k].addr);
-          Serial.println("new slave does not respond");
-        }
-
-      }
-    }  
-   data[0]=0x05;
-   int out = send_command(addr,data,1);
-   if (out == 0) {
-      receive_data(addr,buff,2);
-   }
-    else {Serial.println("not received");}
-   
-   for (int k=0; k<2;k++){
-    delay(10);
-    Serial.println("buffer i");
-    Serial.println(buff[k]);
-
-   } */
-/* int cpt = 0;
-  void loop(){
-    cpt++;
-    if (cpt==10){
-      setCpuFrequencyMhz(10);
-    }
-    uint32_t freq= getCpuFrequencyMhz();
-    Serial.println(freq);
-    delay(1000);
-
-  } */
+}
