@@ -2,14 +2,12 @@
     "device" : {
 
             "potentiometer" : {
-                "pin!" : "A3",
+                "pin!" : "A4",
                 "threshold" : 100,
-                "id" : 3,
-                "behaviour": 1
-            },
+                "id" : 3           },
     "info" : {
         "subscription" : {
             "1" : "led_status"
-        }        }
+            }}
 }
 }

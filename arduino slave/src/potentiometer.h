@@ -9,7 +9,6 @@ public:
     Potentiometer(int adc_pin, int threshold, int id);
     void update_param();
 
-    void get_status();
     void produce_subjects();
     void init_produced_subject();
     void behaviour1();

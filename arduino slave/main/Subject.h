@@ -4,6 +4,12 @@ struct subject {
     int id;
     int value;
     int old_value;
+    
+    subject(int id){
+    this->id=id;
+    this->value=0;
+    this->old_value=0;
+    };
 };
 
 union floatToInt {
@@ -12,8 +18,6 @@ union floatToInt {
         };
 
 typedef struct subject Subject;
-
-Subject * new_subject(int id);
 
 uint8_t * intToBytesArray(int value);
 int bytesArraytoInt(volatile uint8_t* data,uint8_t len,uint8_t begin_val);

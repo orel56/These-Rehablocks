@@ -11,13 +11,18 @@
 Device::Device()
 {
   this->my_addr = EEPROM.read(0x00);
-
-  this->init_received_subject();
-  this->init_produced_subject();
-
+  
 #ifdef INFO
   this->subscription = INFO_SUBSCRIPTION;
 #endif
+#ifndef INFO_BEHAVIOUR
+  this->update_behav();
+#else 
+ this->update_behav(INFO_BEHAVIOUR);
+
+#endif
+  this->init_received_subject();
+
 };
 
 SlaveResponse Device::getResponse()
@@ -179,19 +184,28 @@ void Device::update_global_subjects()
 
 void Device::update_subject()
 {
+  for (int i = 0; i < this->received_subject_nbr; i++)
+  {
+    if (this->receivedSubjects[i]->id == this->pendingCommand[2])
+    {
+      (this->receivedSubjects[i])->old_value = (this->receivedSubjects[i])->value;
+      (this->receivedSubjects[i])->value = bytesArraytoInt(pendingCommand,4,3);
+    }
+  }
 }
 
 void Device::init_received_subject()
 {
-  int n = sizeof(this->subscription);
+  int n = sizeof(this->subscription)*8;
+
   int id_sub = 0;
   for (int i = 0; i < n; i++)
   {
-    id_sub = this->subscription & (0b10000000 >> i);
+    id_sub = (this->subscription & (0b10000000 >> i));
     if (id_sub)
     {
       this->received_subject_nbr++;
-      this->receivedSubjects[received_subject_nbr - 1] = new_subject(id_sub);
+      this->receivedSubjects[received_subject_nbr - 1] = new Subject(id_sub);
     }
   }
 }
@@ -319,7 +333,11 @@ void Device::i2cReceive(int bytes)
 void Device::behaviour1(){};
 void Device::behaviour2(){};
 void Device::behaviour3(){};
-void Device::behav() { (this->*behaviour)(); this->produce_subjects();}
+void Device::behav()
+{
+  (this->*behaviour)();
+  this->produce_subjects();
+}
 
 void Device::update_behav(uint8_t i)
 {
@@ -354,12 +372,31 @@ void Device::update_behav(uint8_t i)
 void Device::update_param()
 { // use pendingcommand to access the data aquired from master
 }
-void Device::get_status(){};
+void Device::get_status()
+{
+  SlaveResponse resp;
+  resp.buffer[0] = this->acknowledge;
+  resp.buffer[1] = this->producedSubjects[0]->value;
+  resp.size = 2;
+  uint8_t *value;
+  for (int i = 1; i < this->produced_subject_nbr; i++)
+  {
+    resp.buffer[resp.size] = uint8_t(this->producedSubjects[i]->id);
+    resp.size++;
+    value = intToBytesArray(this->producedSubjects[i]->value);
+    resp.buffer[resp.size] = value[0];
+    resp.buffer[resp.size + 1] = value[1];
+    resp.buffer[resp.size + 2] = value[2];
+    resp.buffer[resp.size + 3] = value[3];
+    resp.size += 4;
+  }
+  this->status = resp;
+};
 
 void Device::setup(){};
 
-void Device::init_produced_subject(){
-
+void Device::init_produced_subject()
+{
 }
 
-void Device::produce_subjects(){}
+void Device::produce_subjects() {}

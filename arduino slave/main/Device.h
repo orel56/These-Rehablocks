@@ -4,7 +4,7 @@
 #include "config.h"
 #include "Subject.h"
 struct SlaveResponse {
-    uint8_t buffer[20]={};
+    uint8_t buffer[50]={};
     uint8_t size=0;
 
 };
@@ -32,9 +32,9 @@ class Device {
     uint8_t connect_follow=0;
 
     Subject * producedSubjects[MAX_SUBJECT];
-    int produced_subject_nbr;
+    int produced_subject_nbr=0;
 
-    int received_subject_nbr;
+    int received_subject_nbr=0;
     Subject * receivedSubjects[MAX_SUBJECT];
 
     Device();
@@ -89,7 +89,7 @@ class Device {
 
     virtual void update_param();
 
-    virtual void get_status();
+    void get_status();
 
     void update_global_subjects();
 
@@ -98,7 +98,7 @@ class Device {
     void init_received_subject();
     virtual void init_produced_subject();
     virtual void produce_subjects();
-    virtual void update_subject();
+    void update_subject();
 
     bool is_subscribe();
 

@@ -10,15 +10,11 @@ public:
     int elapsed_time =0;
     int timer=0;
     double t=0.0;
-    bool mouv =0;
-
+    
     Led(int pin);
     Led(int pin,int id);
     Led();
     void update_param();
-    void update_subject();
-    void get_status();
-
     void init_produced_subject();
     void produce_subjects();
 

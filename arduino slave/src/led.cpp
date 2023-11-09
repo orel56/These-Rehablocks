@@ -8,10 +8,10 @@ Led::Led(int pin)
 
 #ifdef LED_FREQUENCY
     this->frequency = LED_FREQUENCY;
-    this->period = 1/LED_FREQUENCY;
+    this->period = 1 / LED_FREQUENCY;
 #endif
 #ifdef LED_TIME
-    this->max_time=LED_TIME;
+    this->max_time = LED_TIME;
 #endif
 }
 
@@ -23,17 +23,18 @@ Led::Led(int pin, int id)
     this->elapsed_time = millis();
 #ifdef LED_FREQUENCY
     this->frequency = LED_FREQUENCY;
-    this->period = 1/LED_FREQUENCY;
+    this->period = 1 / LED_FREQUENCY;
 #endif
 #ifdef LED_TIME
-    this->max_time=LED_TIME;
+    this->max_time = LED_TIME;
 #endif
 }
 
-void Led::init_produced_subject(){
-    this->produced_subject_nbr=2;
-    this->producedSubjects[0]= new_subject(0b00000001);
-    this->producedSubjects[1]= new_subject(0b00001000);
+void Led::init_produced_subject()
+{
+    this->produced_subject_nbr = 2;
+    this->producedSubjects[0] = new Subject(0b00000001);
+    this->producedSubjects[1] = new Subject(0b00001000);
 }
 
 Led::Led()
@@ -42,20 +43,21 @@ Led::Led()
 
 void Led::behaviour1()
 {
-    if (this->mouv)
+    bool mouv = bool(this->producedSubjects[1]->value);
+    if (mouv)
     {
         this->timer = 0;
         this->elapsed_time = millis();
-        this->current_value=0;
+        this->current_value = 0;
     }
     else
     {
-        this->timer = (millis() - elapsed_time)/1e3;
-        int blink_flag=this->timer-((unsigned long)this->max_time);
-        if (blink_flag>0)
-        {   
-            float t = fmod(blink_flag,this->period)/ (this->period);
-            this->current_value=(t<0.5) ? 1 : 0;
+        this->timer = (millis() - elapsed_time) / 1e3;
+        int blink_flag = this->timer - ((unsigned long)this->max_time);
+        if (blink_flag > 0)
+        {
+            float t = fmod(blink_flag, this->period) / (this->period);
+            this->current_value = (t < 0.5) ? 1 : 0;
         }
     }
     digitalWrite(this->pin, this->current_value);
@@ -63,62 +65,48 @@ void Led::behaviour1()
 
 void Led::behaviour2()
 {
-    this->timer = millis()-this->elapsed_time;
-    if (this->mouv)
+    bool mouv = bool(this->producedSubjects[1]->value);
+    this->timer = millis() - this->elapsed_time;
+    if (mouv)
     {
         this->timer = 0;
         this->elapsed_time = millis();
         this->current_value = 0;
     }
-    else {
-    this->timer = (millis() - elapsed_time)/1e3;
-    int blink_flag=this->timer-((unsigned long)this->max_time);
-    if (blink_flag>0 && this->current_value==0)
+    else
     {
-        this->current_value = 1;
-    }
+        this->timer = (millis() - elapsed_time) / 1e3;
+        int blink_flag = this->timer - ((unsigned long)this->max_time);
+        if (blink_flag > 0 && this->current_value == 0)
+        {
+            this->current_value = 1;
+        }
     }
     digitalWrite(this->pin, this->current_value);
-
 }
 
-void Led::update_param(){
-    if(this->pendingCommand[1]==1){
-        this->frequency=bytesArraytoInt(pendingCommand,5,2);
-        this->period=1/this->frequency;
-    }
-}
-
-void Led::produce_subjects(){
-    for(int id =0; id<this->produced_subject_nbr;id++){
-        if ((this->producedSubjects[id])->id==0b00001000){
-            (this->producedSubjects[id])->old_value=this->previous_value;
-            (this->producedSubjects[id])->value=this->current_value;
-        }
-        else {
-            (this->producedSubjects[id])->old_value = 1;
-            (this->producedSubjects[id])->value=1;
-        }
-    }
-}
-
-void Led::update_subject(){
-    switch (pendingCommand[2])
+void Led::update_param()
+{
+    if (this->pendingCommand[1] == 1)
     {
-    case 1:
-        this->mouv=pendingCommand[3];
-        break;
-    default:
-        this->mouv=0;
-        break;
+        this->frequency = bytesArraytoInt(pendingCommand, 5, 2);
+        this->period = 1 / this->frequency;
     }
 }
 
-void Led::get_status(){
-    SlaveResponse resp;
-    resp.buffer[0]=this->acknowledge;
-    resp.buffer[1]=0;
-    resp.buffer[2]=uint8_t (this->current_value);
-    resp.size=3;
-    this->status=resp;
+void Led::produce_subjects()
+{
+    for (int id = 0; id < this->produced_subject_nbr; id++)
+    {
+        if ((this->producedSubjects[id])->id == 0b00001000)
+        {
+            (this->producedSubjects[id])->old_value = this->previous_value;
+            (this->producedSubjects[id])->value = this->current_value;
+        }
+        else
+        {
+            (this->producedSubjects[id])->old_value = 1;
+            (this->producedSubjects[id])->value = 1;
+        }
+    }
 }

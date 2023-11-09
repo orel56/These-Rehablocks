@@ -1,16 +1,5 @@
 #include "Subject.h"
 
-
-Subject * new_subject(int id){
-    Subject * sub = new Subject();
-    sub->id=id;
-    sub->value=0;
-    sub->old_value=0;
-    return sub;
-}
-
-
-
 uint8_t *intToBytesArray(int value)
 {
     static unsigned char bytes[sizeof(value)];
@@ -25,15 +14,13 @@ int bytesArraytoInt(volatile uint8_t *data, uint8_t len, uint8_t begin_val)
 {
     int value = 0;
     int buffer = 0;
-    for (int i = begin_val; i < len; i++)
+    for (int i = begin_val; i < (len+begin_val); i++)
     {
+        Serial.println(data[i]);
         buffer = data[i];
         buffer = buffer << ((i - begin_val) * 8);
         value += buffer;
     }
-    Serial.println("extracted value from data received : ");
-    Serial.println(value);
-
     return value;
 }
 
