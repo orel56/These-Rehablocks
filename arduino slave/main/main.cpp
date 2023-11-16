@@ -13,6 +13,7 @@ void i2cRequestEvent()
 
 void i2cReceiveEvent(int bytesReceived)
 {
+
   I2CDevice->i2cReceive(bytesReceived);
 }
 
@@ -30,6 +31,7 @@ void setup()
   byte i2c_addr;
   i2c_addr = EEPROM.read(0x00);
   Wire.begin(i2c_addr);
+  TWAR=(i2c_addr<<1)|1;
   Wire.onRequest(i2cRequestEvent);
   Wire.onReceive(i2cReceiveEvent);
   if (i2c_addr == 0x08)
@@ -54,17 +56,13 @@ void setup()
 void loop()
 {
   bool btn_val = !digitalRead(DECO_BTN);
-  delay(2000);
   if (I2CDevice->mode == 0)
   {
-    Serial.println("waiting for connexion");
-    I2CDevice->behav();
+    I2CDevice->tick();
   }
  else if (I2CDevice->mode == 1)
   {
-    Serial.println("I'am waiting for ping dude");
-
-    I2CDevice->behav();
+    I2CDevice->tick();
   }
   else if (I2CDevice->mode == 2)
   {  
@@ -72,7 +70,7 @@ void loop()
     {
       I2CDevice->deconnect();
     }
-    I2CDevice->behav();
+    I2CDevice->tick();
 
   }
   else if (I2CDevice->mode == 3)

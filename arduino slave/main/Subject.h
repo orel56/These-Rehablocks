@@ -19,11 +19,11 @@ union floatToInt {
 
 typedef struct subject Subject;
 
-uint8_t * intToBytesArray(int value);
+void intToBytesArray(int value,uint8_t bytes[4]);
 int bytesArraytoInt(volatile uint8_t* data,uint8_t len,uint8_t begin_val);
 
-uint8_t * floatToBytesArray(float value);
+void floatToBytesArray(float value, uint8_t bytes[4]);
 float bytesArraytoFloat(volatile uint8_t* data,uint8_t len,uint8_t begin_val);
 
-uint8_t * charToBytesArray(char value);
+void charToBytesArray(char value,uint8_t bytes[4]);
 char bytesArraytoChar(volatile uint8_t* data,uint8_t len,uint8_t begin_val);

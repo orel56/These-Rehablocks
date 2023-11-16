@@ -11,18 +11,17 @@
 Device::Device()
 {
   this->my_addr = EEPROM.read(0x00);
-  
+
 #ifdef INFO
   this->subscription = INFO_SUBSCRIPTION;
 #endif
 #ifndef INFO_BEHAVIOUR
   this->update_behav();
-#else 
- this->update_behav(INFO_BEHAVIOUR);
+#else
+  this->update_behav(INFO_BEHAVIOUR);
 
 #endif
   this->init_received_subject();
-
 };
 
 SlaveResponse Device::getResponse()
@@ -31,7 +30,8 @@ SlaveResponse Device::getResponse()
   response.buffer[0] = this->acknowledge;
   if (command == 2)
   {
-    uint8_t *bytes = intToBytesArray(this->id);
+    uint8_t bytes[4];
+    intToBytesArray(this->id,bytes);
     response.buffer[1] = bytes[0];
     response.buffer[2] = bytes[1];
     response.buffer[3] = this->subscription;
@@ -40,7 +40,7 @@ SlaveResponse Device::getResponse()
   }
   else if (command == 3)
   {
-    response = this->status;
+    response=this->status;
   }
   else
   {
@@ -58,7 +58,7 @@ uint8_t Device::expectedReceiveLength(uint8_t commandId)
   }
   else if (commandId == 0x04)
   {
-    return RECEIVED_COMMAND_MAX_BYTES;
+    return 7;
   }
   else if (commandId == 0x06)
   {
@@ -73,11 +73,13 @@ uint8_t Device::expectedReceiveLength(uint8_t commandId)
 void Device::process()
 {
   this->command = this->pendingCommand[0];
+
   if (this->mode == 0)
   {
     if (command == 0x02)
     {
       Serial.println("command is get_info");
+      this->acknowledge = 1;
 
       this->connect_follow++;
     }
@@ -85,11 +87,13 @@ void Device::process()
     {
       Serial.println("command is change addr");
       this->connect_follow++;
+      this->acknowledge = 1;
       this->changeAddr(this->pendingCommand[1]);
     }
     else if (command == 0x00)
     {
       Serial.println("command is ping and my addr is 0x08 meaning I 'am connecting");
+      this->acknowledge = 1;
       this->connect_follow++;
     }
   }
@@ -97,11 +101,16 @@ void Device::process()
   {
     if (command == 0x03)
     {
+      Serial.println("command is get_status");
+
       this->acknowledge = 1;
       this->get_status();
     }
     else if (command == 0x04) // publish subjects
     {
+      Serial.println("command is publish_subject");
+
+      this->acknowledge = 1;
       this->acknowledge = this->grap_subject();
     }
     else if (command == 0x05) // update behaviour
@@ -121,10 +130,11 @@ void Device::process()
   }
   else if (this->mode == 1)
   {
+    Serial.println(command);
     if (command == 0x00)
     {
+      Serial.println("erasing addr");
       EEPROM.write(0x00, 0x08);
-
       digitalWrite(USR_LED, LOW);
       digitalWrite(SAP, LOW);
       this->mode = 3;
@@ -144,6 +154,8 @@ uint8_t Device::grap_subject()
   {
     if (is_subscribe())
     {
+      Serial.print("I'am subscribe to the subject");
+      Serial.println(this->pendingCommand[2]);
       this->update_subject();
       return 1;
     }
@@ -189,14 +201,15 @@ void Device::update_subject()
     if (this->receivedSubjects[i]->id == this->pendingCommand[2])
     {
       (this->receivedSubjects[i])->old_value = (this->receivedSubjects[i])->value;
-      (this->receivedSubjects[i])->value = bytesArraytoInt(pendingCommand,4,3);
+      (this->receivedSubjects[i])->value = bytesArraytoInt(pendingCommand, 4, 3);
+
     }
   }
 }
 
 void Device::init_received_subject()
 {
-  int n = sizeof(this->subscription)*8;
+  int n = sizeof(this->subscription) * 8;
 
   int id_sub = 0;
   for (int i = 0; i < n; i++)
@@ -212,10 +225,9 @@ void Device::init_received_subject()
 
 void Device::changeAddr(uint8_t addr)
 {
-  Serial.println("changing my addr 0x08 for the new one : ");
-  Serial.println(addr);
+
   this->my_addr = addr;
-  TWAR = addr << 1;
+  TWAR = addr << 1 |1;
   EEPROM.write(0x00, this->my_addr);
 }
 
@@ -223,6 +235,7 @@ void Device::tick()
 {
   if (pendingCommandLength)
   {
+
     // oh my, we've received a command!
 
     // if you're going to be very slow in processing this,
@@ -231,7 +244,6 @@ void Device::tick()
     // Here we just do it "real time" for simplicity
 
     // 1) process that command
-    Serial.println("there a new pending command that need to be process");
     this->process();
 
     // 2) zero that flag, so we don't process multiple times
@@ -248,7 +260,6 @@ void Device::deconnect()
 {
   digitalWrite(USR_LED, HIGH);
   digitalWrite(SAP, HIGH);
-  Serial.println("addr erased, 0x08 wrote in 0x00 eeprom address");
   this->mode = 1;
 }
 
@@ -261,7 +272,6 @@ void Device::connect()
   else
   {
     digitalWrite(USR_LED, LOW);
-    Serial.println("connect end");
     digitalWrite(SAP, LOW);
     this->mode = 2;
   }
@@ -378,17 +388,17 @@ void Device::get_status()
   resp.buffer[0] = this->acknowledge;
   resp.buffer[1] = this->producedSubjects[0]->value;
   resp.size = 2;
-  uint8_t *value;
+  uint8_t bytes[4];
   for (int i = 1; i < this->produced_subject_nbr; i++)
   {
     resp.buffer[resp.size] = uint8_t(this->producedSubjects[i]->id);
-    resp.size++;
-    value = intToBytesArray(this->producedSubjects[i]->value);
-    resp.buffer[resp.size] = value[0];
-    resp.buffer[resp.size + 1] = value[1];
-    resp.buffer[resp.size + 2] = value[2];
-    resp.buffer[resp.size + 3] = value[3];
-    resp.size += 4;
+    resp.size+=1;
+    intToBytesArray(this->producedSubjects[i]->value,bytes);
+    for (int k=0;k<4;k++){
+      resp.buffer[resp.size] = bytes[k];
+      resp.size+=1;
+    }
+
   }
   this->status = resp;
 };

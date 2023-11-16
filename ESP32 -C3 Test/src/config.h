@@ -1,6 +1,6 @@
 #define MIN_ADDR 0x09
 #define MAX_ADDR 0x77
-#define SAP A3
+#define SAP A2
 
 #define MAX_DEVICE 10
 
@@ -10,4 +10,6 @@
 
 #define RECEIVED_COMMAND_MAX_BYTES 20
 
-#define TEST 2
+#define TEST 1
+
+

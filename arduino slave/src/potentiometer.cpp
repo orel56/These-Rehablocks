@@ -20,7 +20,6 @@ Potentiometer::Potentiometer(int adc_pin, int threshold, int id){
 
 void Potentiometer::behaviour1(){
     int read =analogRead(adc_pin);
-    Serial.println(abs(this->current_value - read));
     if(abs(this->current_value - read)>this->threshold){
         this->previous_value=this->current_value;
         this->current_value=read;
@@ -40,7 +39,7 @@ void Potentiometer::produce_subjects(){
             (this->producedSubjects[id])->old_value=this->previous_value;
 
             (this->producedSubjects[id])->value=this->current_value;
-
+            
         }
         else {
             (this->producedSubjects[id])->old_value = 1;
