@@ -55,6 +55,7 @@ void setup()
  */
 void loop()
 {
+  delay(1000);
   bool btn_val = !digitalRead(DECO_BTN);
   if (I2CDevice->mode == 0)
   {

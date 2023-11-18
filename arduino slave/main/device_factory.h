@@ -13,5 +13,7 @@
 #elif ACCELEROMETER
     #include "accelerometer.h"
     Accelerometer * I2CDevice = new Potentiometer(ACCELEROMETER_ID);
-
+#elif JOYSTICK
+    #include "joystick.h"
+    joystick * I2CDevice = new joystick(JOYSTICK_PINX,JOYSTICK_PINY,JOYSTICK_THRESHOLD,JOYSTICK_ID);
 #endif

@@ -1,9 +1,9 @@
 {
     "device" : {
-
-            "potentiometer" : {
-                "pin!" : "A4",
-                "threshold" : 100,
+            "joystick" : {
+                "pinx!" : "A4",
+                "piny!" : "A5",
+                "threshold" : 25,
                 "id" : 3           },
     "info" : {
         "subscription" : {
