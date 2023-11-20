@@ -12,4 +12,4 @@
 
 #define TEST 1
 
-
+#define DEV_NAME "TEST_JOYSTICK"

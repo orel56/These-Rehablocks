@@ -88,3 +88,84 @@ int bytesArraytoInt(volatile uint8_t *data, uint8_t len, uint8_t begin_val)
     }
     return value;
 }
+
+int init_ble(){
+  BLEDevice::init(DEV_NAME);
+  pServer = BLEDevice::createServer();
+  pServer->setCallbacks(new MyServerCallbacks());
+
+  BLEService *pService = pServer->createService(SERVICE_UUID);
+
+  pCharacteristic = pService->createCharacteristic(
+      CHARACTERISTIC_UUID,
+      BLECharacteristic::PROPERTY_READ |
+          BLECharacteristic::PROPERTY_WRITE |
+          BLECharacteristic::PROPERTY_INDICATE |
+          BLECharacteristic::PROPERTY_NOTIFY);
+
+  pCharacteristic->addDescriptor(new BLE2902());
+
+  pService->start();
+
+  BLEAdvertising *pAdvertising = pServer->getAdvertising();
+
+  pAdvertising->addServiceUUID(SERVICE_UUID);
+  pAdvertising->setScanResponse(false);
+  pAdvertising->setMinPreferred(0x0);
+  BLEDevice::startAdvertising();
+  Serial.println("Waiting for client connection to notify...");
+  return 1;
+}
+
+std::string data_to_send(device *nodes[10], uint8_t n)
+{
+    std::string data = "{\"Device\":";
+    // on écrit du json en flatten
+    /* {"Device" : DEV_NAME,
+         "Nodes" : {
+            "type" : node[i]->type,
+            "id":  node[i]->id,
+            "produced subjects": {
+                nodes[i]->my_subjects[j]->id : nodes[i]->my_subjects[j]->value
+            }
+            "received subjects": {
+                nodes[i]->my_subjects[j]->id : nodes[i]->my_subjects[j]->value
+            }
+         }
+        }
+    */
+    data.append("DEV_NAME");
+    data.append(",\"Nodes\":\{ \"");
+
+    char buff[50];
+    for (int i = 0; i < n; i++)
+    {
+        sprintf(buff,"%d",i);
+        data.append(buff);
+        data.append("\":{ \"type\":");
+        sprintf(buff,"%d",nodes[i]->type);
+        data.append(buff);
+
+        data.append(",\"id\":");
+        sprintf(buff,"%d",nodes[i]->id);
+        data.append(buff);
+        data.append(",\"Produced subject\":{\"");
+        sprintf(buff,"%d",nodes[i]->my_subjects[1]->id);
+        data.append(buff);        
+        data.append("\":");
+        sprintf(buff,"%d",nodes[i]->my_subjects[1]->value);
+        data.append(buff);
+        data.append("}");
+        data.append(",\"Received subject\":{ \"");
+        sprintf(buff,"%d",nodes[i]->my_subjects[0]->id);
+        data.append(buff);
+        data.append("\":");
+        sprintf(buff,"%d",nodes[i]->my_subjects[0]->value);
+        data.append(buff);
+        data.append("}}");
+    }
+
+    data.append("}}");
+
+    return data;
+}
