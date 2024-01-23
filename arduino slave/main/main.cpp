@@ -5,6 +5,7 @@
 #include <Arduino.h>
 
 uint8_t val = 0;
+uint8_t sap = 0;
 
 void i2cRequestEvent()
 {
@@ -21,13 +22,11 @@ void setup()
 {
   // SETUP wire
   pinMode(USR_LED, OUTPUT);
-  pinMode(SAP, OUTPUT);
-  pinMode(DECO_BTN, INPUT_PULLUP);
-
+  pinMode(USR_BTN, INPUT_PULLUP);
+  pinMode(SAP,INPUT);
   EEPROM.begin();
   Serial.begin(9600);
   I2CDevice->setup();
-  // pas LOW plutot du analog read
   byte i2c_addr;
   i2c_addr = EEPROM.read(0x00);
   Wire.begin(i2c_addr);
@@ -38,12 +37,13 @@ void setup()
   {
     I2CDevice->mode = 0;
     digitalWrite(USR_LED, HIGH);
-    digitalWrite(SAP, HIGH);
+
   }
   else
   {
     I2CDevice->mode = 2;
     digitalWrite(USR_LED, LOW);
+
   }
 }
 
@@ -56,14 +56,19 @@ void setup()
 void loop()
 {
   delay(1000);
-  bool btn_val = !digitalRead(DECO_BTN);
+  I2CDevice->behav();
+  
+  bool btn_val = !digitalRead(USR_BTN);
   if (I2CDevice->mode == 0)
-  {
-    I2CDevice->tick();
-  }
- else if (I2CDevice->mode == 1)
-  {
-    I2CDevice->tick();
+  {  
+    if(!sap){ // if sap is not required yet
+      Serial.println("Waiting for button ");
+      sap=btn_val; //check the btn value and store it in sap
+      if (sap){ // if there was a change on sap (ie btn was pressed ) put SAP to OUTPUT and HIGH
+        pinMode(SAP,OUTPUT);
+        digitalWrite(SAP,HIGH);
+      }
+    }
   }
   else if (I2CDevice->mode == 2)
   {  
@@ -71,15 +76,11 @@ void loop()
     {
       I2CDevice->deconnect();
     }
-    I2CDevice->tick();
-
   }
   else if (I2CDevice->mode == 3)
   {
     Serial.println("deco");
-
     val = !val;
     digitalWrite(USR_LED, val);
-    delay(1000);
   }
 }
