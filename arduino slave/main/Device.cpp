@@ -271,23 +271,18 @@ void Device::connect()
   }
   else
   {
+    Serial.println("changing usr led to low, after connect follow reached 3");
     digitalWrite(USR_LED, LOW);
     digitalWrite(SAP, LOW);
     pinMode(SAP,INPUT);
+    this->tick();
+
     this->mode = 2;
   }
 }
 
 void Device::i2cRequest()
 {
-  if (this->mode == 0)
-  {
-    this->connect();
-  }
-  else if (this->mode == 2)
-  {
-    this->tick();
-  }
   // get the response (the this knows what to say)
   SlaveResponse resp = this->getResponse();
   // write it to the out buffer
@@ -338,6 +333,15 @@ void Device::i2cReceive(int bytes)
       // for the next command
       msgLen = 0;
     }
+  }
+  Serial.println("On termine le process de i2cReceive");
+  if (this->mode == 0)
+  {
+    this->connect();
+  }
+  else if (this->mode == 2)
+  {
+    this->tick();
   }
 }
 

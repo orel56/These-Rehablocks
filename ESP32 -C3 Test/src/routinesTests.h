@@ -333,7 +333,117 @@ int test_broadcast()
 
 int test_multiple_connexion()
 {
-    return 1;
+     int out = 0;
+    Serial.println("Routine de test numéro 1, connexion d'une device");
+    while(mydevice_number<2){
+    if (digitalRead(SAP))
+    {
+        Serial.println("SAP is 1");
+        out = send_command(0x08, "ping");
+        delay(5);
+        Serial.print(" after delay out is : ");
+        Serial.println(out);
+        if (!out)
+        {
+            Serial.println("Ping has been received at 0x08 apearing the new device if ack");
+            receive_data(0x08, buff, 1);
+            if (buff[0] == 1)
+            {
+                Serial.println("ACK is 1");
+                Serial.println("Creating a new device");
+
+                my_nodes[mydevice_number] = new device();
+                mydevice_number++;
+                new_addr++;
+                Serial.println("Sending change addr command");
+
+                out = send_command(0x08, "change_addr", new_addr);
+                delay(10);
+
+                if (!out)
+                {
+                    Serial.println("Change addr was received checking if ACK is 1");
+                    my_nodes[0]->addr = new_addr;
+                    receive_data(new_addr, buff, 1);
+                    if (buff[0] == 1)
+                    {
+                        Serial.println("ACK is 1 after change addr");
+
+                        Serial.println("Sending get info command");
+
+                        out = send_command(new_addr, "get_info");
+                        delay(10);
+
+                        if (!out)
+                        {
+                            Serial.println("Change addr was received checking if ACK is 1");
+                            receive_data(new_addr, buff, 5);
+                            if (buff[0] == 1)
+                            {
+                                Serial.print("Subscription : ");
+                                Serial.println(buff[3]);
+
+                                Serial.print("Behaviour : ");
+                                Serial.println(buff[4]);
+
+                                int id = bytesArraytoInt(buff, 2, 1);
+                                Serial.print("Id: ");
+                                Serial.println(id);
+                            }
+                            else
+                            {
+                                Serial.print("ACK is 0 after get_info for : ");
+                                Serial.println(mydevice_number);
+
+                                return 0;
+                            }
+                        }
+                        else
+                        {
+                            Serial.print("get_info was not received by : ");
+                            Serial.println(mydevice_number);
+
+                            return 0;
+                        }
+                    }
+                    else
+                    {
+                        Serial.print("ACK is 0 after change addr of : ");
+                        Serial.println(mydevice_number);
+
+                        return 0;
+                    }
+                }
+                else
+                {
+                    Serial.print("change_addr was not received by : ");
+                    Serial.println(mydevice_number);
+
+                    return 0;
+                }
+            }
+            else
+            {
+                Serial.print("ACK is 0 for : ");
+                Serial.println(mydevice_number);
+
+                return 0;
+            }
+        }
+        else
+        {
+            Serial.print("ping was not received by : ");
+            Serial.println(mydevice_number);
+
+            return 0;
+        }
+    }
+    else
+    {
+        Serial.println("SAP was 0");
+    }
+    }
+return 1;
 }
 
 /*#############################################*/

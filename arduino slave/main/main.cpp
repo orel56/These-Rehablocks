@@ -56,9 +56,9 @@ void setup()
 void loop()
 {
   delay(1000);
+  I2CDevice->behav();
   
   bool btn_val = !digitalRead(USR_BTN);
-
   if (I2CDevice->mode == 0)
   {  
     if(!sap){ // if sap is not required yet
