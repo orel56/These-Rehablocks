@@ -3,6 +3,11 @@
 #include "Arduino.h"
 #include "config.h"
 #include "Subject.h"
+#include "Device.h"
+#include "config.h"
+#include <Wire.h>
+#include "EEPROM.h"
+
 struct SlaveResponse {
     uint8_t buffer[50]={};
     uint8_t size=0;

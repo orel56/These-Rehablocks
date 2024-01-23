@@ -2,11 +2,9 @@
  * A class to centralize our peripheral's state
  * and message processing.
  */
-
 #include "Device.h"
-#include "config.h"
-#include <Wire.h>
-#include "EEPROM.h"
+
+
 
 Device::Device()
 {
@@ -394,6 +392,7 @@ void Device::get_status()
     resp.buffer[resp.size] = uint8_t(this->producedSubjects[i]->id);
     resp.size+=1;
     intToBytesArray(this->producedSubjects[i]->value,bytes);
+
     for (int k=0;k<4;k++){
       resp.buffer[resp.size] = bytes[k];
       resp.size+=1;

@@ -364,10 +364,23 @@ int test_main_multiple_devices()
 
 // Test the main function of one node and sending bluetooth data to the main node. Referenced as TEST = 7
 
-int test_main_function()
+int test_bluetooth_function_V1()
+{
+    while (!digitalRead(A1))
+    {
+        check_ble(my_nodes,mydevice_number);
+    }   
+
+    return 1;
+}
+
+
+
+
+int test_bluetooth_function()
 {
     int out = 0;
-    Serial.println("Routine de test numéro 3, fonctionnement nominal ");
+    Serial.println("Routine de test numéro 7, fonctionnement nominal et connection bluetooth avec un joystick ");
     int val;
     my_nodes[mydevice_number] = new device();
     mydevice_number++;
@@ -411,7 +424,7 @@ int test_main_function()
                     Serial.println(buff[2]);
 
                     Serial.print("Subject value is : ");
-                    val = bytesArraytoInt(buff, 3, 4);
+                    val = bytesArraytoInt(buff, 4, 3);
                     Serial.println(val);
 
                     for (int k = 0; k < my_sub_number; k++)
@@ -441,9 +454,9 @@ int test_main_function()
         {
             Serial.println("publishing subjects..... ");
 
-            my_subjects[0]->value = !(my_subjects[0]->value);
-            intToBytesArray(my_subjects[0]->value, bytes);
-            out = send_command(my_nodes[i]->addr, "publish_subject", my_subjects[0]->id, bytes);
+            my_nodes[i]->my_subjects[0]->value = !(my_nodes[i]->my_subjects[0]->value);
+            intToBytesArray(my_nodes[i]->my_subjects[0]->value, bytes);
+            out = send_command(my_nodes[i]->addr, "publish_subject",my_nodes[i]->my_subjects[0]->id, bytes);
             delay(5);
             if (!out)
             {
@@ -466,30 +479,9 @@ int test_main_function()
                 return 0;
             }
         }
-        if (deviceConnected)
-        {
-            dataToSend=data_to_send(my_nodes,mydevice_number);
-            pCharacteristic->setValue(dataToSend);
-            pCharacteristic->notify();
-            delay(500); // Adjust delay as needed
-        }
+        check_ble(my_nodes,mydevice_number);
 
-        if (!deviceConnected && oldDeviceConnected)
-        {
-            delay(500);
-            pServer->startAdvertising();
-            Serial.println("start advertising");
-            oldDeviceConnected = deviceConnected;
-        }
-
-        if (deviceConnected && !oldDeviceConnected)
-        {
-
-            oldDeviceConnected = deviceConnected;
-        }
     }
 
     return 1;
 }
-
-

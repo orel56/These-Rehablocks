@@ -4,6 +4,30 @@ volatile uint8_t receivedBytes[RECEIVED_COMMAND_MAX_BYTES];
 
 uint8_t data2[50];
 
+BLEServer *pServer = NULL;
+BLECharacteristic *pCharacteristic = NULL;
+bool deviceConnected = false;
+bool oldDeviceConnected = false;
+std::string dataToSend = "";
+
+#define SERVICE_UUID "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
+#define CHARACTERISTIC_UUID "beb5483e-36e1-4688-b7f5-ea07361b26a8"
+
+
+
+class MyServerCallbacks : public BLEServerCallbacks
+{
+  void onConnect(BLEServer *pServer)
+  {
+    deviceConnected = true;
+  }
+
+  void onDisconnect(BLEServer *pServer)
+  {
+    deviceConnected = false;
+  }
+};
+
 
 int send_command(uint8_t addr, const char *command, uint8_t value, uint8_t* value2)
 {
@@ -83,10 +107,36 @@ int bytesArraytoInt(volatile uint8_t *data, uint8_t len, uint8_t begin_val)
     for (int i = begin_val; i < (len + begin_val); i++)
     {
         buffer = data[i];
+        Serial.println(data[i]);
         buffer = buffer << ((i - begin_val) * 8);
         value += buffer;
     }
     return value;
+}
+
+
+void check_ble(device * nodes[10], uint8_t n){
+    if (deviceConnected)
+        {
+            dataToSend=data_to_send(nodes,n);
+            pCharacteristic->setValue(dataToSend);
+            pCharacteristic->notify();
+            delay(500); // Adjust delay as needed
+        }
+
+        if (!deviceConnected && oldDeviceConnected)
+        {
+            delay(500);
+            pServer->startAdvertising();
+            Serial.println("start advertising");
+            oldDeviceConnected = deviceConnected;
+        }
+
+        if (deviceConnected && !oldDeviceConnected)
+        {
+
+            oldDeviceConnected = deviceConnected;
+        }
 }
 
 int init_ble(){
@@ -119,7 +169,7 @@ int init_ble(){
 
 std::string data_to_send(device *nodes[10], uint8_t n)
 {
-    std::string data = "{\"Device\":";
+    std::string data = "{\"Device\":\"";
     // on écrit du json en flatten
     /* {"Device" : DEV_NAME,
          "Nodes" : {
@@ -134,8 +184,8 @@ std::string data_to_send(device *nodes[10], uint8_t n)
          }
         }
     */
-    data.append("DEV_NAME");
-    data.append(",\"Nodes\":\{ \"");
+    data.append(DEV_NAME);
+    data.append("\",\"Nodes\":\{ \"");
 
     char buff[50];
     for (int i = 0; i < n; i++)
@@ -143,6 +193,8 @@ std::string data_to_send(device *nodes[10], uint8_t n)
         sprintf(buff,"%d",i);
         data.append(buff);
         data.append("\":{ \"type\":");
+
+
         sprintf(buff,"%d",nodes[i]->type);
         data.append(buff);
 

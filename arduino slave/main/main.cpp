@@ -31,7 +31,7 @@ void setup()
   byte i2c_addr;
   i2c_addr = EEPROM.read(0x00);
   Wire.begin(i2c_addr);
-  TWAR=(i2c_addr<<1)|1;
+  TWAR=(i2c_addr<<1)|1; //  enable  broadcast
   Wire.onRequest(i2cRequestEvent);
   Wire.onReceive(i2cReceiveEvent);
   if (i2c_addr == 0x08)

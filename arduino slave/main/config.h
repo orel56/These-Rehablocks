@@ -3,5 +3,4 @@
 
 #define DECO_BTN A2
 #define USR_LED A1
-
 #define SAP 11

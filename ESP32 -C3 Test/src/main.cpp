@@ -40,6 +40,10 @@ void setup()
   {
     test = &test_main_function;
   }
+  else if (TEST == 7)
+  {
+    test = &test_bluetooth_function;
+  }
 #else
   Serial.println("TEST is not define");
   test = &(handle);
