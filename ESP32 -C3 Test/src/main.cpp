@@ -21,7 +21,7 @@ void setup()
   Wire.setTimeOut(100);
   pinMode(SAP, INPUT_PULLDOWN);
 
-  init_ble();
+  //init_ble();
   
 #ifdef TEST
   if (TEST == 0)

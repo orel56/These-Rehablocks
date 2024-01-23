@@ -42,7 +42,7 @@ int test_connexion()
                 Serial.println("Sending change addr command");
 
                 out = send_command(0x08, "change_addr", new_addr);
-                delay(5);
+                delay(10);
 
                 if (!out)
                 {
@@ -56,7 +56,7 @@ int test_connexion()
                         Serial.println("Sending get info command");
 
                         out = send_command(new_addr, "get_info");
-                        delay(5);
+                        delay(10);
 
                         if (!out)
                         {

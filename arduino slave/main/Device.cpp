@@ -71,7 +71,7 @@ uint8_t Device::expectedReceiveLength(uint8_t commandId)
 void Device::process()
 {
   this->command = this->pendingCommand[0];
-
+  Serial.println("processing");
   if (this->mode == 0)
   {
     if (command == 0x02)
@@ -135,6 +135,7 @@ void Device::process()
       EEPROM.write(0x00, 0x08);
       digitalWrite(USR_LED, LOW);
       digitalWrite(SAP, LOW);
+      pinMode(SAP,INPUT);
       this->mode = 3;
     }
   }
@@ -223,7 +224,7 @@ void Device::init_received_subject()
 
 void Device::changeAddr(uint8_t addr)
 {
-
+  Serial.println("change addr");
   this->my_addr = addr;
   TWAR = addr << 1 |1;
   EEPROM.write(0x00, this->my_addr);
@@ -256,6 +257,7 @@ void Device::tick()
 
 void Device::deconnect()
 {
+  pinMode(SAP,OUTPUT);
   digitalWrite(USR_LED, HIGH);
   digitalWrite(SAP, HIGH);
   this->mode = 1;
@@ -271,6 +273,7 @@ void Device::connect()
   {
     digitalWrite(USR_LED, LOW);
     digitalWrite(SAP, LOW);
+    pinMode(SAP,INPUT);
     this->mode = 2;
   }
 }
@@ -297,6 +300,7 @@ void Device::i2cReceive(int bytes)
   uint8_t msgLen = 0;
   // loop over each incoming byte
   this->acknowledge = 0;
+  Serial.println("command is received");
   for (int i = 0; i < bytes; i++)
   {
     // stick that byte in our receive buffer
@@ -323,7 +327,6 @@ void Device::i2cReceive(int bytes)
       {
         this->pendingCommand[i] = this->receivedBytes[i];
       }
-
       // 2) tell the main loop we've got something
       // of interest in pending cmd buffer
       this->pendingCommandLength = msgLen;
