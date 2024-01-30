@@ -59,6 +59,15 @@ void loop()
   I2CDevice->behav();
   
   bool btn_val = !digitalRead(USR_BTN);
+
+/*   if (btn_val){
+     I2CDevice->my_addr = 0x08;
+     TWAR = 0x08 << 1 |1;
+     EEPROM.write(0x00, I2CDevice->my_addr);
+     Serial.println("RESET");
+     I2CDevice->mode=3;
+  } */
+
   if (I2CDevice->mode == 0)
   {  
     if(!sap){ // if sap is not required yet

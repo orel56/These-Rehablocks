@@ -40,6 +40,9 @@ void setup()
   {
     test = &test_main_function;
   }
+  else if (TEST== 4){
+    test = &test_multiple_connexion;
+  }
   else if (TEST == 7)
   {
     test = &test_bluetooth_function;

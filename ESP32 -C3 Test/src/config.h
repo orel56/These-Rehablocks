@@ -10,6 +10,6 @@
 
 #define RECEIVED_COMMAND_MAX_BYTES 20
 
-#define TEST 1
+#define TEST 4 
 
 #define DEV_NAME "TEST_JOYSTICK"

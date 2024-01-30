@@ -3,7 +3,6 @@
 #include "Arduino.h"
 #include "config.h"
 #include "Subject.h"
-#include "Device.h"
 #include "config.h"
 #include <Wire.h>
 #include "EEPROM.h"
@@ -34,7 +33,7 @@ class Device {
     uint8_t my_addr;
 
     uint8_t mode = 0;
-    uint8_t connect_follow=1;
+    uint8_t connect_follow=0;
 
     Subject * producedSubjects[MAX_SUBJECT];
     int produced_subject_nbr=0;
