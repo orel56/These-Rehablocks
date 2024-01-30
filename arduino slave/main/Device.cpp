@@ -79,7 +79,6 @@ void Device::process()
       Serial.println("command is get_info");
       this->acknowledge = 1;
 
-      this->connect_follow++;
     }
     else if (command == 0x01)
     {
