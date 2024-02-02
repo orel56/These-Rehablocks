@@ -337,6 +337,7 @@ int test_multiple_connexion()
     Serial.println("Routine de test numéro 1, connexion d'une device");
     delay(1000);
     while(mydevice_number<2){
+    delay(1000);
     if (digitalRead(SAP))
     {
         Serial.println("SAP is 1");
