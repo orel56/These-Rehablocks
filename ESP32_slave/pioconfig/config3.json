@@ -1,0 +1,15 @@
+
+{
+    "device" : {
+            "led" : {
+                "pin!" : "A0",
+                "id" : 3
+            },
+        "info" : {
+            "subscription" : {
+                "4" : "mouv"
+            }
+                    }
+
+}
+}
