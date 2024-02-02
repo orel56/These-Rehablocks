@@ -12,7 +12,7 @@ unsigned long end_time = 0;
 
 unsigned long spent_time = 0;
 
-void handle(){};
+int handle(){return 0;};
 
 void setup()
 {
@@ -40,9 +40,28 @@ void setup()
   {
     test = &test_main_function;
   }
+  else if (TEST == 4)
+  {
+    test = &test_multiple_connexion;
+  }
+  else if (TEST == 5)
+  {
+    test = &test_deconnection_real;
+  }
+  else if (TEST == 6)
+  {
+    test = &test_main_multiple_devices;
+  }
   else if (TEST == 7)
   {
     test = &test_bluetooth_function;
+  }
+  else if (TEST == 8)
+  {
+    test = &test_bluetooth_several_nodes;
+  }
+  else {
+    test= &handle;
   }
 #else
   Serial.println("TEST is not define");
@@ -52,8 +71,7 @@ void setup()
 
 void loop()
 {
-
-  delay(10000);
+  delay(5000);
   if (end == -1)
   {
     begin_time = millis();

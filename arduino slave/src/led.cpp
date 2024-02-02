@@ -5,7 +5,7 @@ Led::Led(int pin)
     this->id = 0b10000001;
     pinMode(pin, OUTPUT);
     this->elapsed_time = millis();
-
+    
 #ifdef LED_FREQUENCY
     this->frequency = LED_FREQUENCY;
     this->period = 1 / LED_FREQUENCY;
@@ -21,6 +21,8 @@ Led::Led(int pin, int id)
     this->id = id;
     pinMode(pin, OUTPUT);
     this->elapsed_time = millis();
+    pinMode(A5,INPUT_PULLUP);
+    this->init_produced_subject();
 #ifdef LED_FREQUENCY
     this->frequency = LED_FREQUENCY;
     this->period = 1 / LED_FREQUENCY;
@@ -43,21 +45,31 @@ Led::Led()
 
 void Led::behaviour1()
 {
-    bool mouv = bool(this->producedSubjects[1]->value);
+    bool mouv = bool(this->receivedSubjects[0]->value);
+
     if (mouv)
     {
+        mouv= bool(this->receivedSubjects[0]->old_value);
+        if (!mouv){
+        Serial.println("mouvement is detected");
         this->timer = 0;
         this->elapsed_time = millis();
         this->current_value = 0;
+        }
     }
     else
     {
         this->timer = (millis() - elapsed_time) / 1e3;
-        int blink_flag = this->timer - ((unsigned long)this->max_time);
+
+        float blink_flag = this->timer - ((unsigned long)this->max_time);
         if (blink_flag > 0)
         {
-            float t = fmod(blink_flag, this->period) / (this->period);
+
+            float t =blink_flag / (this->period);
+  
+            t = t-(int)floor(t);
             this->current_value = (t < 0.5) ? 1 : 0;
+
         }
     }
     digitalWrite(this->pin, this->current_value);
@@ -65,7 +77,7 @@ void Led::behaviour1()
 
 void Led::behaviour2()
 {
-    bool mouv = bool(this->producedSubjects[1]->value);
+    bool mouv = bool(this->receivedSubjects[0]->value);
     this->timer = millis() - this->elapsed_time;
     if (mouv)
     {

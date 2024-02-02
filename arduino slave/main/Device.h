@@ -34,7 +34,6 @@ class Device {
     uint8_t my_addr;
 
     uint8_t mode = 0;
-    uint8_t connect_follow=1;
 
     Subject * producedSubjects[MAX_SUBJECT];
     int produced_subject_nbr=0;
@@ -77,7 +76,6 @@ class Device {
     void changeAddr(uint8_t addr);
 
     void deconnect();
-    void connect();
     void tick();
 //behaviour handling 
 

@@ -207,15 +207,15 @@ int test_main_function()
     my_nodes[0]->id=1;
     my_nodes[0]->type= 3;
 
-    my_nodes[0]->my_subjects[0] = new Subject();
-    my_nodes[0]->my_subjects[1] = new Subject();
+    my_nodes[0]->subjects[0] = new Subject();
+    my_nodes[0]->subjects[1] = new Subject();
     my_sub_number += 2;
 
-    my_nodes[0]->my_subjects[0]->id = 0b00001000; // Subject that must be sent to potar
-    my_nodes[0]->my_subjects[0]->value = 0;
+    my_nodes[0]->subjects[0]->id = 0b00001000; // Subject that must be sent to potar
+    my_nodes[0]->subjects[0]->value = 0;
 
-    my_nodes[0]->my_subjects[1]->id = 0b00000010; // Subject that is received by potar
-    my_nodes[0]->my_subjects[1]->value = 0;
+    my_nodes[0]->subjects[1]->id = 0b00000010; // Subject that is received by potar
+    my_nodes[0]->subjects[1]->value = 0;
 
     uint8_t bytes[4];
 
@@ -247,10 +247,10 @@ int test_main_function()
 
                     for (int k = 0; k < my_sub_number; k++)
                     {
-                        if (my_nodes[i]->my_subjects[k]->id == buff[2])
+                        if (my_nodes[i]->subjects[k]->id == buff[2])
                         {
                             Serial.println("Subject is saved");
-                            my_nodes[i]->my_subjects[k]->value = val;
+                            my_nodes[i]->subjects[k]->value = val;
                             break;
                         }
                     }
@@ -333,8 +333,9 @@ int test_broadcast()
 
 int test_multiple_connexion()
 {
-     int out = 0;
+    int out = 0;
     Serial.println("Routine de test numéro 1, connexion d'une device");
+    delay(1000);
     while(mydevice_number<2){
     if (digitalRead(SAP))
     {
@@ -465,6 +466,159 @@ int test_deconnection_real()
 
 int test_main_multiple_devices()
 {
+
+// initialise la base de données de noeuds fonctionnels avec les informations de chaques noeuds 
+    int out = 0;
+    Serial.println("Routine de test numéro 6, fonctionnement nominal de deux noeuds fonctionnels et échange d'information permettant la modification du comportement d'un noeud par rapport à un autre");
+    int val;
+
+///////noeud led/////////////////////////////////
+    my_nodes[mydevice_number] = new device();
+    mydevice_number++;
+    my_nodes[0]->addr = 0x0a;
+    my_nodes[0]->subscription = 2;
+    my_nodes[0]->id=1;
+    my_nodes[0]->type= 3;
+
+///////noeud joystick//////////////////////////////////////
+    my_nodes[mydevice_number] = new device();
+    mydevice_number++;
+    my_nodes[1]->addr = 0x0b;
+    my_nodes[1]->subscription = 8;
+    my_nodes[1]->id=1;
+    my_nodes[1]->type= 0;
+
+//////// initialisation des sujets ///////////// 
+
+    ////// sujet direction /////
+    my_subjects[0]= new Subject();
+    my_subjects[0]->id = 0b00000010;
+    my_subjects[0]->value = 0;   
+    ////// sujet led_status ///// 
+    my_subjects[1]= new Subject();
+    my_subjects[1]->id = 0b00001000;
+    my_subjects[1]->value = 0;   
+
+    my_sub_number=2;
+/////// stock une référence au pointeur dans les sujets des noeuds 
+    my_nodes[1]->subjects[0] = my_subjects[0]; // sujet produit par le noeud joystick "direction"
+    my_nodes[1]->subjects[1] = my_subjects[1]; // sujet reçut par le noeud joystick "led_status"
+    my_nodes[1]->sub_number = 2;
+
+    my_nodes[0]->subjects[0] = my_subjects[1]; // sujet produit par le noeud led "led_status"
+    my_nodes[0]->subjects[1] = my_subjects[0]; // sujet reçut par le noeud led "direction"
+    my_nodes[0]->sub_number = 2;
+
+/*     Serial.println("test : ");
+    Serial.print("subject of id : ");
+    Serial.println(my_nodes[0]->subjects[0]->id);
+    Serial.print("value is : ");
+    Serial.println(my_nodes[0]->subjects[0]->value);
+    Serial.print("changing value in subjects list ");
+    my_subjects[0]->value = 25; 
+    Serial.print("subject of id : ");
+    Serial.println(my_nodes[0]->subjects[0]->id);
+    Serial.print("new value is : ");
+    Serial.println(my_nodes[0]->subjects[0]->value);  
+    Serial.println(my_nodes[1]->subjects[1]->value);   */
+
+
+
+
+    uint8_t bytes[4];
+
+ while (!digitalRead(A1))
+    {
+        delay(500);
+        for (int i = 0; i < mydevice_number; i++)
+        {
+            // boucle pour les status
+            out = send_command(my_nodes[i]->addr, "get_status");
+            delay(5);
+            if (!out)
+            {
+                //on réccupère les status de chaque noeuds 
+
+                Serial.println("get_status was received checking if ACK is 1");
+                receive_data(my_nodes[i]->addr, buff, 7);
+                if (buff[0] == 1)
+                {
+                   /*  Serial.println("ACK is 1 after get_status");
+                    Serial.print("Node addr is : ");
+                    Serial.println(my_nodes[i]->addr);
+
+                    Serial.print("Device status is : ");
+                    Serial.println(buff[1]);
+
+                    Serial.print("Subject produced is of id : ");
+                    Serial.println(buff[2]);
+
+                    Serial.print("Subject value is : "); */
+                    val = bytesArraytoInt(buff, 4, 3);
+                    //Serial.println(val);
+ 
+                    // on les stocks dans nos images des noeuds qu'on a en mémoire pour mettre à jour les valeurs 
+                    for (int k = 0; k < my_sub_number; k++)
+                    {
+                        if (my_subjects[k]->id == buff[2])
+                        {
+                            Serial.println("Subject is saved");
+                            my_subjects[k]->value = val;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    Serial.println("ACK is 0 after get_status");
+                    return 0;
+                }
+            }
+            else
+            {
+                Serial.print("get_status was not received by : ");
+                Serial.println(my_nodes[i]->addr);
+                return 0;
+            }
+        }
+    for (int i = 0; i < mydevice_number; i++)
+        {
+            Serial.println("publishing subjects..... ");
+            intToBytesArray(my_nodes[i]->subjects[1]->value, bytes);
+            /* for (int k=0;k<4;k++){
+                Serial.println(bytes[k]);
+            } */
+            Serial.print("id sent is : ");
+            Serial.println(my_nodes[i]->subjects[1]->id);
+            Serial.print("to node : ");
+            Serial.print(my_nodes[i]->addr);
+            out = send_command(my_nodes[i]->addr, "publish_subject",my_nodes[i]->subjects[1]->id, bytes);
+            delay(5);
+            if (!out)
+            {
+                Serial.println("publish subject was received checking if ACK is 1");
+                receive_data(my_nodes[i]->addr, buff, 1);
+
+                if (buff[0] == 1)
+                {
+                    Serial.println("ACK is 1 after publish_subject");
+                }
+                else
+                {
+                    Serial.println("ACK is 0 after publish subject");
+                    Serial.println(my_nodes[i]->addr);
+
+                    return 0;
+                }
+            }
+            else
+            {
+                Serial.print("publish subject was not received by : ");
+                Serial.println(my_nodes[i]->addr);
+                return 0;
+            }
+        }
+    }
     return 1;
 }
 
@@ -499,15 +653,15 @@ int test_bluetooth_function()
     my_nodes[0]->id=1;
     my_nodes[0]->type= 3;
 
-    my_nodes[0]->my_subjects[0] = new Subject();
-    my_nodes[0]->my_subjects[1] = new Subject();
+    my_nodes[0]->subjects[0] = new Subject();
+    my_nodes[0]->subjects[1] = new Subject();
     my_sub_number += 2;
 
-    my_nodes[0]->my_subjects[0]->id = 0b00001000; // Subject that must be sent to potar
-    my_nodes[0]->my_subjects[0]->value = 0;
+    my_nodes[0]->subjects[0]->id = 0b00001000; // Subject that must be sent to potar
+    my_nodes[0]->subjects[0]->value = 0;
 
-    my_nodes[0]->my_subjects[1]->id = 0b00000010; // Subject that is sent by potar
-    my_nodes[0]->my_subjects[1]->value = 0;
+    my_nodes[0]->subjects[1]->id = 0b00000010; // Subject that is sent by potar
+    my_nodes[0]->subjects[1]->value = 0;
 
     uint8_t bytes[4];
 
@@ -539,10 +693,10 @@ int test_bluetooth_function()
 
                     for (int k = 0; k < my_sub_number; k++)
                     {
-                        if (my_nodes[i]->my_subjects[k]->id == buff[2])
+                        if (my_nodes[i]->subjects[k]->id == buff[2])
                         {
                             Serial.println("Subject is saved");
-                            my_nodes[i]->my_subjects[k]->value = val;
+                            my_nodes[i]->subjects[k]->value = val;
                             break;
                         }
                     }
@@ -564,9 +718,9 @@ int test_bluetooth_function()
         {
             Serial.println("publishing subjects..... ");
 
-            my_nodes[i]->my_subjects[0]->value = !(my_nodes[i]->my_subjects[0]->value);
-            intToBytesArray(my_nodes[i]->my_subjects[0]->value, bytes);
-            out = send_command(my_nodes[i]->addr, "publish_subject",my_nodes[i]->my_subjects[0]->id, bytes);
+            my_nodes[i]->subjects[0]->value = !(my_nodes[i]->subjects[0]->value);
+            intToBytesArray(my_nodes[i]->subjects[0]->value, bytes);
+            out = send_command(my_nodes[i]->addr, "publish_subject",my_nodes[i]->subjects[0]->id, bytes);
             delay(5);
             if (!out)
             {
@@ -594,4 +748,15 @@ int test_bluetooth_function()
     }
 
     return 1;
+}
+
+/*#############################################*/
+/*######              TEST 8            #######*/
+/*#############################################*/
+
+// Test the main function of one node and sending bluetooth data to the main node with several nodes connected. Referenced as TEST = 8
+
+int test_bluetooth_several_nodes(){
+
+return 1;
 }

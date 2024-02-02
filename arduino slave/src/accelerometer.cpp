@@ -1,5 +1,6 @@
 #include <accelerometer.h>
 
+/*
 
 Accelerometer::Accelerometer(int id, int threshold){
 
@@ -26,4 +27,4 @@ void Accelerometer::setup(){
   Wire.write(0x00);                  // Make reset - place a 0 into the 6B register
   Wire.endTransmission(true);        //end the transmission
 
-}
+} */
