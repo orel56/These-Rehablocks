@@ -21,7 +21,8 @@ struct devices {
     int id;
     int type;
     int subscription;
-    Subject *my_subjects[20];
+    Subject *subjects[20];
+    int sub_number = 0;
 };
 
 typedef struct devices device;

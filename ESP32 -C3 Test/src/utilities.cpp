@@ -92,10 +92,12 @@ void receive_data(uint8_t addr, uint8_t *data_buffer, uint8_t bytesToBeReceived)
 
 void intToBytesArray(int value, uint8_t bytes[4])
 {
-    
+    Serial.print("entering intToBytesArray method, value is :");
+    Serial.println(value);
     for (int i = 0; i < int(sizeof(value)); i++)
     {
         bytes[i] = (value & (0xff << ( i * 8))) >> 8*i;
+        //Serial.println(bytes[i]);
     } 
 
 }
@@ -107,7 +109,6 @@ int bytesArraytoInt(volatile uint8_t *data, uint8_t len, uint8_t begin_val)
     for (int i = begin_val; i < (len + begin_val); i++)
     {
         buffer = data[i];
-        Serial.println(data[i]);
         buffer = buffer << ((i - begin_val) * 8);
         value += buffer;
     }
@@ -202,17 +203,17 @@ std::string data_to_send(device *nodes[10], uint8_t n)
         sprintf(buff,"%d",nodes[i]->id);
         data.append(buff);
         data.append(",\"Produced subject\":{\"");
-        sprintf(buff,"%d",nodes[i]->my_subjects[1]->id);
+        sprintf(buff,"%d",nodes[i]->subjects[1]->id);
         data.append(buff);        
         data.append("\":");
-        sprintf(buff,"%d",nodes[i]->my_subjects[1]->value);
+        sprintf(buff,"%d",nodes[i]->subjects[1]->value);
         data.append(buff);
         data.append("}");
         data.append(",\"Received subject\":{ \"");
-        sprintf(buff,"%d",nodes[i]->my_subjects[0]->id);
+        sprintf(buff,"%d",nodes[i]->subjects[0]->id);
         data.append(buff);
         data.append("\":");
-        sprintf(buff,"%d",nodes[i]->my_subjects[0]->value);
+        sprintf(buff,"%d",nodes[i]->subjects[0]->value);
         data.append(buff);
         data.append("}}");
     }

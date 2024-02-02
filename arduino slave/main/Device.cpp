@@ -71,42 +71,39 @@ uint8_t Device::expectedReceiveLength(uint8_t commandId)
 void Device::process()
 {
   this->command = this->pendingCommand[0];
-  Serial.println("processing");
   if (this->mode == 0)
   {
     if (command == 0x02)
     {
-      Serial.println("command is get_info");
       this->acknowledge = 1;
+      // Led is switched to off to inform user the device is connected
+      digitalWrite(USR_LED, LOW);
+      this->mode = 2;
 
-      this->connect_follow++;
     }
     else if (command == 0x01)
     {
-      Serial.println("command is change addr");
-      this->connect_follow++;
       this->acknowledge = 1;
       this->changeAddr(this->pendingCommand[1]);
     }
     else if (command == 0x00)
     {
-      Serial.println("command is ping and my addr is 0x08 meaning I 'am connecting");
       this->acknowledge = 1;
-      this->connect_follow++;
+      //ping was received during connexion process thus SAP is not needed 
+      digitalWrite(SAP, LOW);
+      pinMode(SAP,INPUT);
     }
   }
   else if (this->mode == 2)
   {
     if (command == 0x03)
     {
-      Serial.println("command is get_status");
 
       this->acknowledge = 1;
       this->get_status();
     }
     else if (command == 0x04) // publish subjects
     {
-      Serial.println("command is publish_subject");
 
       this->acknowledge = 1;
       this->acknowledge = this->grap_subject();
@@ -153,8 +150,6 @@ uint8_t Device::grap_subject()
   {
     if (is_subscribe())
     {
-      Serial.print("I'am subscribe to the subject");
-      Serial.println(this->pendingCommand[2]);
       this->update_subject();
       return 1;
     }
@@ -195,12 +190,21 @@ void Device::update_global_subjects()
 
 void Device::update_subject()
 {
+  Serial.print("I need to receive : "); 
+  Serial.print(this->received_subject_nbr);
+  Serial.println("subjects");
   for (int i = 0; i < this->received_subject_nbr; i++)
   {
+    Serial.print("subject id received is : ");
+    Serial.println(this->pendingCommand[2]);
     if (this->receivedSubjects[i]->id == this->pendingCommand[2])
-    {
+    {    Serial.print("ok");
+
       (this->receivedSubjects[i])->old_value = (this->receivedSubjects[i])->value;
       (this->receivedSubjects[i])->value = bytesArraytoInt(pendingCommand, 4, 3);
+
+      Serial.print("new value is :");
+      Serial.println(this->receivedSubjects[i]->value);
 
     }
   }
@@ -262,24 +266,10 @@ void Device::deconnect()
   digitalWrite(SAP, HIGH);
   this->mode = 1;
 }
+  
 
-void Device::connect()
-{
-  if (this->connect_follow < 3)
-  {
-    this->tick();
-  }
-  else
-  {
-    Serial.println("changing usr led to low, after connect follow reached 3");
-    digitalWrite(USR_LED, LOW);
-    digitalWrite(SAP, LOW);
-    pinMode(SAP,INPUT);
-    this->tick();
 
-    this->mode = 2;
-  }
-}
+
 
 void Device::i2cRequest()
 {
@@ -295,7 +285,6 @@ void Device::i2cReceive(int bytes)
   uint8_t msgLen = 0;
   // loop over each incoming byte
   this->acknowledge = 0;
-  Serial.println("command is received");
   for (int i = 0; i < bytes; i++)
   {
     // stick that byte in our receive buffer
@@ -334,15 +323,8 @@ void Device::i2cReceive(int bytes)
       msgLen = 0;
     }
   }
-  Serial.println("On termine le process de i2cReceive");
-  if (this->mode == 0)
-  {
-    this->connect();
-  }
-  else if (this->mode == 2)
-  {
     this->tick();
-  }
+
 }
 
 void Device::behaviour1(){};

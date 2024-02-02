@@ -80,13 +80,13 @@ uint8_t joystick::get_direction()
 {
     uint8_t direction = 0; // 0= pas de changement de direction, 1= est, 2=Nord-est, 3= nord,....
 
-    if (this->valueX[0] < -5)
+    if (this->valueX[0] < -20)
     {
-        if (this->valueY[0] < -5)
+        if (this->valueY[0] < -20)
         {
             direction = 6;
         }
-        else if (this->valueY[0] > 5)
+        else if (this->valueY[0] > 20)
         {
             direction = 4;
         }
@@ -95,13 +95,13 @@ uint8_t joystick::get_direction()
             direction = 5;
         }
     }
-    else if (this->valueX[0] > 5)
+    else if (this->valueX[0] > 20)
     {
-        if (this->valueY[0] < -5)
+        if (this->valueY[0] < -20)
         {
             direction = 8;
         }
-        else if (this->valueY[0] > 5)
+        else if (this->valueY[0] > 20)
         {
             direction = 2;
         }
@@ -112,11 +112,11 @@ uint8_t joystick::get_direction()
     }
     else
     {
-        if (this->valueY[0] < -5)
+        if (this->valueY[0] < -20)
         {
             direction = 7;
         }
-        else if (this->valueY[0] > 5)
+        else if (this->valueY[0] > 20)
         {
             direction = 3;
         }
