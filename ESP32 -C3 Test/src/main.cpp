@@ -58,7 +58,7 @@ void setup()
   }
   else if (TEST == 8)
   {
-    test = &test_bluetooth_several_nodes;
+    test = &test_esp32_slave_pinout;
   }
   else {
     test= &handle;

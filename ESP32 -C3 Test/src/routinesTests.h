@@ -757,7 +757,54 @@ int test_bluetooth_function()
 
 // Test the main function of one node and sending bluetooth data to the main node with several nodes connected. Referenced as TEST = 8
 
-int test_bluetooth_several_nodes(){
+int test_esp32_slave_pinout(){
+    // initialise la base de données de noeuds fonctionnels avec les informations de chaques noeuds 
+    int out = 0;
+    Serial.println("Routine de test numéro 6, fonctionnement nominal de deux noeuds fonctionnels et échange d'information permettant la modification du comportement d'un noeud par rapport à un autre");
+    int val;
 
+///////noeud led/////////////////////////////////
+    my_nodes[mydevice_number] = new device();
+    mydevice_number++;
+    my_nodes[0]->addr = 0x0a;
+   
+    uint8_t bytes[4];
+
+ while (!digitalRead(A1))
+    {
+        Serial.print("SAP value is : ");
+        Serial.println(digitalRead(A2));
+
+        delay(1000);
+        for (int i = 0; i < mydevice_number; i++)
+        {
+            // boucle pour les status
+            out = send_command(0x00, "ping");
+            delay(5);
+            if (!out)
+            {
+                //on réccupère les status de chaque noeuds 
+
+              /*   Serial.println("ping was received checking if ACK is 1");
+                receive_data(my_nodes[i]->addr, buff, 1);
+                if (buff[0] == 1)
+                {
+                   Serial.println("ping received by esp32");
+                }
+                else
+                {
+                    Serial.println("ACK is 0 after ping");
+                    return 0;
+                } */
+            }
+            else
+            {
+                Serial.print("ping was not received by : ");
+                Serial.println(my_nodes[i]->addr);
+                return 0;
+            }
+        }
+   
+    }
 return 1;
 }

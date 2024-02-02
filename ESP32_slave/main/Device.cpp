@@ -4,6 +4,7 @@
  */
 #include "Device.h"
 
+volatile uint8_t *i2cSlaveAddrRegister = (volatile uint8_t *)0x3FF67010;
 
 
 Device::Device()
@@ -226,8 +227,10 @@ void Device::changeAddr(uint8_t addr)
 {
   Serial.println("change addr");
   this->my_addr = addr;
-  TWAR = addr << 1 |1;
+  *i2cSlaveAddrRegister = addr;
   EEPROM.write(0x00, this->my_addr);
+  EEPROM.commit();
+
 }
 
 void Device::tick()

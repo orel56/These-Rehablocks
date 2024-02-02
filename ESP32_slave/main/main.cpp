@@ -18,21 +18,25 @@ void i2cReceiveEvent(int bytesReceived)
   I2CDevice->i2cReceive(bytesReceived);
 }
 
+TwoWire I2C2 = TwoWire(1);
+ 
 void setup()
 {
   // SETUP wire
   pinMode(USR_LED, OUTPUT);
   pinMode(USR_BTN, INPUT_PULLUP);
   pinMode(SAP,INPUT);
-  EEPROM.begin();
+  EEPROM.begin(EEPROM_SIZE);
   Serial.begin(9600);
   I2CDevice->setup();
   byte i2c_addr;
   i2c_addr = EEPROM.read(0x00);
-  Wire.begin(i2c_addr);
-  TWAR=(i2c_addr<<1)|1; //  enable  broadcast
-  Wire.onRequest(i2cRequestEvent);
-  Wire.onReceive(i2cReceiveEvent);
+  I2C2.begin(i2c_addr,SDA2,SCL2,100000UL);
+  I2C2.onReceive(i2cReceiveEvent);
+  I2C2.onRequest(i2cRequestEvent);
+
+ // TWAR=(i2c_addr<<1)|1; //  enable  broadcast
+
   if (i2c_addr == 0x08)
   {
     I2CDevice->mode = 0;

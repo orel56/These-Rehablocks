@@ -14,6 +14,7 @@ struct SlaveResponse {
 
 };
 
+
 class Device {
   public:
     int time = 0;
