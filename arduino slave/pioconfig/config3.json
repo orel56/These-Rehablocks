@@ -3,11 +3,11 @@
     "device" : {
             "led" : {
                 "pin!" : "A0",
-                "id" : 3
+                "id" : 4
             },
         "info" : {
             "subscription" : {
-                "4" : "mouv"
+                "4" : "direction"
             }
                     }
 

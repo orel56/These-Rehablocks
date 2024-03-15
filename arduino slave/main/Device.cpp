@@ -148,30 +148,11 @@ uint8_t Device::grap_subject()
   }
   else
   {
-    if (is_subscribe())
-    {
-      this->update_subject();
-      return 1;
-    }
-    else
-    {
-      return 0;
-    }
+      return (this->update_subject());
   }
 }
 
-bool Device::is_subscribe()
-{
-  uint8_t tmp = this->pendingCommand[2];
 
-  if ((tmp & (tmp - 1)) == 0)
-  {
-
-    tmp = (this->subscription >> __builtin_ctz(tmp)) & 1;
-  }
-
-  return tmp;
-}
 
 void Device::update_global_subjects()
 {
@@ -188,7 +169,7 @@ void Device::update_global_subjects()
   }
 }
 
-void Device::update_subject()
+uint8_t Device::update_subject()
 {
   Serial.print("I need to receive : "); 
   Serial.print(this->received_subject_nbr);
@@ -205,19 +186,20 @@ void Device::update_subject()
 
       Serial.print("new value is :");
       Serial.println(this->receivedSubjects[i]->value);
-
+      return 1;
     }
   }
+  return 0;
 }
 
 void Device::init_received_subject()
 {
-  int n = sizeof(this->subscription) * 8;
+  int n = sizeof(this->subscription);
 
   int id_sub = 0;
   for (int i = 0; i < n; i++)
   {
-    id_sub = (this->subscription & (0b10000000 >> i));
+    id_sub = (this->subscription & (0xff << ( i * 8))) >> 8*i;;
     if (id_sub)
     {
       this->received_subject_nbr++;

@@ -1,6 +1,8 @@
 {
     "device" : {
-            "accelerometer" : {
+            "ultrason" : {
+                "pintrig!" : "A4",
+                "pinecho!" : "A5",
                 "threshold" : 100,
                 "id" : 2
             },

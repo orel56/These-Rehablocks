@@ -1,5 +1,5 @@
 #include <utilities.h>
-uint8_t buff[50];
+uint8_t buff[100];
 
 uint8_t data[5];
 
@@ -31,8 +31,10 @@ int test_connexion()
         if (!out)
         {
             Serial.println("Ping has been received at 0x08 apearing the new device if ack");
+
             receive_data(0x08, buff, 1);
-            if (buff[0] == 1)
+            delay(5);
+            if (buff[0])
             {
                 Serial.println("ACK is 1");
                 Serial.println("Creating a new device");
@@ -41,27 +43,45 @@ int test_connexion()
                 mydevice_number++;
                 Serial.println("Sending change addr command");
 
-                out = send_command(0x08, "change_addr", new_addr);
+                out = 0;
                 delay(10);
 
                 if (!out)
                 {
                     Serial.println("Change addr was received checking if ACK is 1");
                     my_nodes[0]->addr = new_addr;
-                    receive_data(new_addr, buff, 1);
-                    if (buff[0] == 1)
+                    //receive_data(new_addr, buff, 1);
+                    if (buff[0])
                     {
                         Serial.println("ACK is 1 after change addr");
 
                         Serial.println("Sending get info command");
 
-                        out = send_command(new_addr, "get_info");
+                        out = send_command(0x08, "get_info");
                         delay(10);
 
                         if (!out)
                         {
                             Serial.println("Change addr was received checking if ACK is 1");
-                            receive_data(new_addr, buff, 5);
+                            receive_data(0x08, buff, 5);
+                            if (buff[0] == 1)
+                            {
+                                Serial.print("Subscription : ");
+                                Serial.println(buff[3]);
+
+                                Serial.print("Behaviour : ");
+                                Serial.println(buff[4]);
+
+                                int id = bytesArraytoInt(buff, 2, 1);
+                                Serial.print("Id: ");
+                                Serial.println(id); }
+                        out = send_command(0x08, "get_info");
+                        delay(1000);
+
+                        if (!out)
+                        {
+                            Serial.println("Change addr was received checking if ACK is 1");
+                            receive_data(0x08, buff, 5);
                             if (buff[0] == 1)
                             {
                                 Serial.print("Subscription : ");
@@ -75,6 +95,10 @@ int test_connexion()
                                 Serial.println(id);
 
                                 return 1;
+                            }
+                            else {
+                                return 0;
+                            }
                             }
                             else
                             {
@@ -626,7 +650,7 @@ int test_main_multiple_devices()
 /*#############################################*/
 /*######              TEST 7            #######*/
 /*#############################################*/
-
+#if ENABLE_BLE
 // Test the main function of one node and sending bluetooth data to the main node. Referenced as TEST = 7
 
 int test_bluetooth_function_V1()
@@ -750,7 +774,10 @@ int test_bluetooth_function()
 
     return 1;
 }
-
+#else
+int test_bluetooth_function()
+{return 1;}
+#endif
 /*#############################################*/
 /*######              TEST 8            #######*/
 /*#############################################*/
@@ -766,26 +793,26 @@ int test_esp32_slave_pinout(){
 ///////noeud led/////////////////////////////////
     my_nodes[mydevice_number] = new device();
     mydevice_number++;
-    my_nodes[0]->addr = 0x0a;
+    my_nodes[0]->addr = 0x08;
    
     uint8_t bytes[4];
 
  while (!digitalRead(A1))
     {
         Serial.print("SAP value is : ");
-        Serial.println(digitalRead(A2));
+        Serial.println(digitalRead(A1));
 
         delay(1000);
         for (int i = 0; i < mydevice_number; i++)
         {
             // boucle pour les status
-            out = send_command(0x00, "ping");
+            out = send_command(0x08, "ping");
             delay(5);
             if (!out)
             {
                 //on réccupère les status de chaque noeuds 
 
-              /*   Serial.println("ping was received checking if ACK is 1");
+              Serial.println("ping was received checking if ACK is 1");
                 receive_data(my_nodes[i]->addr, buff, 1);
                 if (buff[0] == 1)
                 {
@@ -795,7 +822,7 @@ int test_esp32_slave_pinout(){
                 {
                     Serial.println("ACK is 0 after ping");
                     return 0;
-                } */
+                } 
             }
             else
             {
@@ -806,5 +833,42 @@ int test_esp32_slave_pinout(){
         }
    
     }
+return 1;
+}
+
+/*#############################################*/
+/*######              TEST 9            #######*/
+/*#############################################*/
+
+// Test pour l'esp32 en slave et le bus i2c qui envoi nimp au premier ping
+
+int test_i2c_esp32(){
+    int out = 0;
+    Serial.println("Routine de test numéro 1, connexion d'une device");
+        Serial.println("SAP is 1");
+        for (int k=0;k<2;k++){
+        out = send_command(0x08, "ping");
+        delay(5);
+        Serial.print(" after delay out is : ");
+        Serial.println(out);
+        if (!out)
+        {
+            Serial.println("Ping has been received at 0x08 apearing the new device if ack");
+            delay(5);
+            receive_data(0x08, buff, 1);
+
+            Serial.print("data received after ping number : ");
+            Serial.println(k);
+            Serial.print("ack value is : ");
+            Serial.println(buff[0]);
+        }
+        else {
+            Serial.println("Ping wa not received at 0x08 ");
+
+            return 0;
+        }
+
+        }
+
 return 1;
 }

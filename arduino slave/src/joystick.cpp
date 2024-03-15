@@ -7,8 +7,8 @@ joystick::joystick()
 void joystick::init_produced_subject()
 {
     this->produced_subject_nbr = 2;
-    this->producedSubjects[0] = new Subject(0b00000001);
-    this->producedSubjects[1] = new Subject(0b00000010);
+    this->producedSubjects[0] = new Subject(0);
+    this->producedSubjects[1] = new Subject(4);
 }
 
 joystick::joystick(int pinx, int piny, int threshold, int id)
@@ -61,7 +61,7 @@ void joystick::produce_subjects()
 {
     for (int id = 0; id < this->produced_subject_nbr; id++)
     {
-        if ((this->producedSubjects[id])->id == 0b00000010)
+        if ((this->producedSubjects[id])->id == 4)
         {
             
             (this->producedSubjects[id])->old_value = (this->producedSubjects[id])->value;
@@ -125,6 +125,7 @@ uint8_t joystick::get_direction()
             direction = 0;
         }
     }
+    Serial.println(direction);
 
     return direction;
 }
