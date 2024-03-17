@@ -195,11 +195,11 @@ std::string data_to_send(device *nodes[10], uint8_t n)
         }
     */
     data.append(DEV_NAME);
-    data.append("\",\"Nodes\":\{ \"");
+    data.append("\",\"Nodes\":\{");
 
-    char buff[50];
+    char buff[100];
     for (int i = 0; i < n; i++)
-    {
+    {   data.append(" \"");
         sprintf(buff,"%d",i);
         data.append(buff);
         data.append("\":{ \"type\":");
@@ -211,23 +211,33 @@ std::string data_to_send(device *nodes[10], uint8_t n)
         data.append(",\"id\":");
         sprintf(buff,"%d",nodes[i]->id);
         data.append(buff);
+        data.append(",\"address\":");
+        sprintf(buff,"%d",nodes[i]->addr);
+        data.append(buff);
         data.append(",\"Produced subject\":{\"");
-        sprintf(buff,"%d",nodes[i]->subjects[1]->id);
-        data.append(buff);        
-        data.append("\":");
-        sprintf(buff,"%d",nodes[i]->subjects[1]->value);
-        data.append(buff);
-        data.append("}");
-        data.append(",\"Received subject\":{ \"");
         sprintf(buff,"%d",nodes[i]->subjects[0]->id);
-        data.append(buff);
+        data.append(buff);        
         data.append("\":");
         sprintf(buff,"%d",nodes[i]->subjects[0]->value);
         data.append(buff);
-        data.append("}}");
+        data.append("}");
+        data.append(",\"Received subject\":{ \"");
+        sprintf(buff,"%d",nodes[i]->subjects[1]->id);
+        data.append(buff);
+        data.append("\":");
+        sprintf(buff,"%d",nodes[i]->subjects[1]->value);
+        data.append(buff);
+        data.append("}},");
     }
-
+    data.pop_back();
     data.append("}}");
+    Serial.print(data.c_str()[215]);
+    Serial.print(data.c_str()[216]);
+    Serial.print(data.c_str()[217]);
+    Serial.print(data.c_str()[218]);
+    Serial.print(data.c_str()[219]);
+    Serial.print(data.c_str()[220]);
+    Serial.print(data.c_str()[221]);
 
     return data;
 }

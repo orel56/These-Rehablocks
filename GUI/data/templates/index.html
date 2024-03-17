@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+
+<head>
+    <title>ESP32 bluetooth web</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+</head>
+
+<body>
+      
+    <div class="content">
+        <header>
+          <div class="header-background"></div>
+          <div class="title">
+            <h1>
+              Dashboard de l'objet connecté 
+            </h1>
+          </div>
+        </header>
+    </div>
+
+    <canvas id="canvas1" width="800" height="500"></canvas>
+
+<script>
+  console.log("bonjour");
+
+function my_periodic_method(){
+
+$.ajax({
+    url: "/data",
+    success: display_data,
+    complete: periodic_call,
+    dataType: "json"
+});
+}
+function draw_schema(result)
+{
+  var canvas = document.getElementById("canvas1"); 
+  var context = canvas.getContext("2d");
+  context.clearRect(0,0,800,500)
+  context.beginPath();
+  context.lineWidth="2";
+  context.arc(350, 100, 90, 0, 2 * Math.PI);
+  context.fillText("Noeud Master",315,90);
+  context.fillText(result["Master"],315,110);
+  context.stroke();
+  context.closePath();		
+  let nodes_number = Object.keys(result).length - 1;
+
+  for(let i=0; i<nodes_number;i++){
+    context.beginPath();
+    let x = 200+300*i;
+    context.arc(x, 350, 90, 0, 2 * Math.PI);
+    context.lineWidth="2";
+    context.fillText(result[i.toString()]["Nom"],x-35,290);
+
+    let subject_number= Object.keys(result[i.toString()]["Sujets produits"]).length;
+    for (let k=0;k<subject_number;k++){
+
+      context.fillText("Sujets produits",x-85,350);
+      context.fillText(JSON.stringify(result[i.toString()]["Sujets produits"]),x-7,350);
+    }
+
+    subject_number= Object.keys(result[i.toString()]["Sujets recut"]).length;
+
+    for (let k=0;k<subject_number;k++){
+      context.fillText("Sujets recut",x-70,380);
+
+      context.fillText(JSON.stringify(result[i.toString()]["Sujets recut"]),x-7,380);
+    }
+    context.stroke();
+    context.closePath();
+
+    context.beginPath()
+    context.moveTo(x/2+90 + 170*i,172+90)	
+    context.quadraticCurveTo(200+300*i,50, 170+90+179*i, 100);
+    context.stroke();
+    context.closePath();	
+  }
+}
+        
+function display_data(result) {
+    draw_schema(result);
+}
+
+function periodic_call(){
+   setTimeout(my_periodic_method, 1000);
+}
+
+setTimeout(my_periodic_method, 1000);
+</script>
+
+</body>
+
+</html>

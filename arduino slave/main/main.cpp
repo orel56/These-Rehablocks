@@ -26,7 +26,6 @@ void setup()
   pinMode(SAP,INPUT);
   EEPROM.begin();
   Serial.begin(9600);
-  I2CDevice->setup();
   byte i2c_addr;
   i2c_addr = EEPROM.read(0x00);
   Wire.begin(i2c_addr);
@@ -45,6 +44,8 @@ void setup()
     digitalWrite(USR_LED, LOW);
 
   }
+  I2CDevice->setup();
+
 }
 
 // do other setup you may need..

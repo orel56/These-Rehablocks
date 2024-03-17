@@ -10,8 +10,8 @@
 
 #define RECEIVED_COMMAND_MAX_BYTES 20
 
-#define TEST 1
+#define TEST 7
 
 #define DEV_NAME "TEST_JOYSTICK"
 
-#define ENABLE_BLE 0
+#define ENABLE_BLE 1

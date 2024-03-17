@@ -1,7 +1,7 @@
 {
     "device" : {
             "accelerometer" : {
-                "threshold" : 100,
+                "threshold" : 5,
                 "id" : 2
             },
         "info" : {
