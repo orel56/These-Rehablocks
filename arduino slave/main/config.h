@@ -1,6 +1,6 @@
 #define RECEIVED_COMMAND_MAX_BYTES 20
 #define MAX_SUBJECT 25
 
-#define USR_BTN A2
-#define USR_LED A1
+#define USR_BTN A3
+#define USR_LED A2
 #define SAP 11

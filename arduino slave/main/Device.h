@@ -5,7 +5,7 @@
 #include "Subject.h"
 #include "config.h"
 #include <Wire.h>
-#include "EEPROM.h"
+#include <EEPROM.h>
 
 struct SlaveResponse {
     uint8_t buffer[50]={};
@@ -17,7 +17,7 @@ class Device {
   public:
     int time = 0;
     uint16_t id=0;
-    uint8_t subscription=0;
+    long long subscription=0;
     int current_value =0;
     int previous_value =0;
     uint8_t acknowledge=0; // acknowledge byte value
@@ -100,8 +100,7 @@ class Device {
     void init_received_subject();
     virtual void init_produced_subject();
     virtual void produce_subjects();
-    void update_subject();
+    uint8_t update_subject();
 
-    bool is_subscribe();
 
 };

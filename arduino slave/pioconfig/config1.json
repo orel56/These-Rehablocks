@@ -1,0 +1,16 @@
+{
+    "device" : {
+            "ultrason" : {
+                "pintrig!" : "A4",
+                "pinecho!" : "A5",
+                "threshold" : 100,
+                "id" : 2
+            },
+        "info" : {
+            "subscription" : {
+                "1" : "led_status"
+            }
+                    }
+
+}
+}

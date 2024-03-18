@@ -12,8 +12,11 @@
 
 #elif ACCELEROMETER
     #include "accelerometer.h"
-    Accelerometer * I2CDevice = new Potentiometer(ACCELEROMETER_ID);
+    Accelerometer * I2CDevice = new Accelerometer(ACCELEROMETER_ID,ACCELEROMETER_THRESHOLD);
 #elif JOYSTICK
     #include "joystick.h"
     joystick * I2CDevice = new joystick(JOYSTICK_PINX,JOYSTICK_PINY,JOYSTICK_THRESHOLD,JOYSTICK_ID);
+#elif ULTRASON
+    #include "ultrason.h"
+    ultrason* I2CDevice = new ultrason(ULTRASON_PINTRIG,ULTRASON_PINECHO,ULTRASON_THRESHOLD,ULTRASON_ID);
 #endif

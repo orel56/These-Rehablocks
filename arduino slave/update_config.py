@@ -84,13 +84,16 @@ for config in configs:
                     if device =="info" :
                         for info_key in config['device']["info"] : 
                             if info_key=="subscription" : 
-                                subscrip = 0;
+                                subscrip = ""
                                 print(len(config['device']["info"]))
                                 for sub_key in config['device']["info"]["subscription"] :
                                     sub=config['device']["info"]["subscription"][sub_key]
-                                    subscrip += int(dic.subject_dictionnary[sub],2)
+                                    
+                                    print(sub)
+                                    subscrip+=bin(int(dic.subject_dictionnary[sub]))[2:].zfill(8)
+                                    print(subscrip)
                                 flags += "    ; From %s\n" % device
-                                flags += appendFlags(config['device'][device], device, subscrip)
+                                flags += appendFlags(config['device'][device], device, int(subscrip,2))
 
 
                                 # print(flags).

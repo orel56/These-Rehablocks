@@ -1,13 +1,16 @@
 {
     "device" : {
-            "led" : {
-                "pin!" : "A0",
-                "id" : 3
+            "joystick" : {
+                "pinx!" : "A4",
+                "piny!" : "A5",
+                "threshold" : 20,
+                "id" : 4
             },
         "info" : {
-            "subscription" : 4,
-            "behaviour" : 2
-        }
+            "subscription" : {
+                "1" : "led_status"
+            }
+                    }
 
 }
 }

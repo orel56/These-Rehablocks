@@ -1,0 +1,14 @@
+{
+    "device" : {
+            "accelerometer" : {
+                "threshold" : 5,
+                "id" : 2
+            },
+        "info" : {
+            "subscription" : {
+                "1" : "led_status"
+            }
+                    }
+
+}
+}

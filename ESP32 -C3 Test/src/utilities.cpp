@@ -3,7 +3,7 @@
 volatile uint8_t receivedBytes[RECEIVED_COMMAND_MAX_BYTES];
 
 uint8_t data2[50];
-
+#if (ENABLE_BLE)
 BLEServer *pServer = NULL;
 BLECharacteristic *pCharacteristic = NULL;
 bool deviceConnected = false;
@@ -12,6 +12,7 @@ std::string dataToSend = "";
 
 #define SERVICE_UUID "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
 #define CHARACTERISTIC_UUID "beb5483e-36e1-4688-b7f5-ea07361b26a8"
+
 
 
 
@@ -27,7 +28,7 @@ class MyServerCallbacks : public BLEServerCallbacks
     deviceConnected = false;
   }
 };
-
+#endif
 
 int send_command(uint8_t addr, const char *command, uint8_t value, uint8_t* value2)
 {
@@ -82,11 +83,18 @@ int send_command(uint8_t addr, const char *command, uint8_t value, uint8_t* valu
 
 void receive_data(uint8_t addr, uint8_t *data_buffer, uint8_t bytesToBeReceived)
 {
-    const uint8_t bytesReceived = Wire.requestFrom(addr, bytesToBeReceived);
+    uint8_t dataRead;
+    uint8_t bytesReceived = Wire.requestFrom(addr, bytesToBeReceived);
     for (int i = 0; i < bytesReceived; i++)
     {
-        uint8_t dataRead = Wire.read();
-        data_buffer[i] = dataRead;
+        if(Wire.available()){
+            dataRead= Wire.read();
+            Serial.println(dataRead);
+            data_buffer[i] = dataRead;
+        }
+    else{
+        Serial.print("not available;");
+    }
     }
 }
 
@@ -115,6 +123,7 @@ int bytesArraytoInt(volatile uint8_t *data, uint8_t len, uint8_t begin_val)
     return value;
 }
 
+#if (ENABLE_BLE)
 
 void check_ble(device * nodes[10], uint8_t n){
     if (deviceConnected)
@@ -122,12 +131,12 @@ void check_ble(device * nodes[10], uint8_t n){
             dataToSend=data_to_send(nodes,n);
             pCharacteristic->setValue(dataToSend);
             pCharacteristic->notify();
-            delay(500); // Adjust delay as needed
+            delay(50); // Adjust delay as needed
         }
 
         if (!deviceConnected && oldDeviceConnected)
         {
-            delay(500);
+            delay(50);
             pServer->startAdvertising();
             Serial.println("start advertising");
             oldDeviceConnected = deviceConnected;
@@ -186,11 +195,11 @@ std::string data_to_send(device *nodes[10], uint8_t n)
         }
     */
     data.append(DEV_NAME);
-    data.append("\",\"Nodes\":\{ \"");
+    data.append("\",\"Nodes\":\{");
 
-    char buff[50];
+    char buff[10];
     for (int i = 0; i < n; i++)
-    {
+    {   data.append(" \"");
         sprintf(buff,"%d",i);
         data.append(buff);
         data.append("\":{ \"type\":");
@@ -202,23 +211,27 @@ std::string data_to_send(device *nodes[10], uint8_t n)
         data.append(",\"id\":");
         sprintf(buff,"%d",nodes[i]->id);
         data.append(buff);
+        data.append(",\"address\":");
+        sprintf(buff,"%d",nodes[i]->addr);
+        data.append(buff);
         data.append(",\"Produced subject\":{\"");
-        sprintf(buff,"%d",nodes[i]->subjects[1]->id);
-        data.append(buff);        
-        data.append("\":");
-        sprintf(buff,"%d",nodes[i]->subjects[1]->value);
-        data.append(buff);
-        data.append("}");
-        data.append(",\"Received subject\":{ \"");
         sprintf(buff,"%d",nodes[i]->subjects[0]->id);
-        data.append(buff);
+        data.append(buff);        
         data.append("\":");
         sprintf(buff,"%d",nodes[i]->subjects[0]->value);
         data.append(buff);
-        data.append("}}");
+        data.append("}");
+        data.append(",\"Received subject\":{ \"");
+        sprintf(buff,"%d",nodes[i]->subjects[1]->id);
+        data.append(buff);
+        data.append("\":");
+        sprintf(buff,"%d",nodes[i]->subjects[1]->value);
+        data.append(buff);
+        data.append("}},");
     }
-
+    data.pop_back();
     data.append("}}");
 
     return data;
 }
+#endif

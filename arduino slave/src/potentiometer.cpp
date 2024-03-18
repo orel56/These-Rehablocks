@@ -6,8 +6,8 @@ Potentiometer::Potentiometer(){
 
 void Potentiometer::init_produced_subject(){
     this->produced_subject_nbr=2;
-    this->producedSubjects[0]= new Subject(0b00000001);
-    this->producedSubjects[1]= new Subject(0b00000100);
+    this->producedSubjects[0]= new Subject(0);
+    this->producedSubjects[1]= new Subject(16);
 }
 
 Potentiometer::Potentiometer(int adc_pin, int threshold, int id){
@@ -34,7 +34,7 @@ void Potentiometer::update_param(){
 
 void Potentiometer::produce_subjects(){
     for(int id =0; id<this->produced_subject_nbr;id++){
-        if ((this->producedSubjects[id])->id==0b00000100){
+        if ((this->producedSubjects[id])->id==16){
 
             (this->producedSubjects[id])->old_value=this->previous_value;
 

@@ -16,12 +16,12 @@ int handle(){return 0;};
 
 void setup()
 {
-  Serial.begin(9600);
+  Serial.begin(115200);
   Wire.begin();
   Wire.setTimeOut(100);
   pinMode(SAP, INPUT_PULLDOWN);
-
-  //init_ble();
+  pinMode(A1,INPUT_PULLUP);
+  init_ble();
   
 #ifdef TEST
   if (TEST == 0)
@@ -58,7 +58,10 @@ void setup()
   }
   else if (TEST == 8)
   {
-    test = &test_bluetooth_several_nodes;
+    test = &test_esp32_slave_pinout;
+  }
+  else if (TEST == 9){
+    test = &test_i2c_esp32;
   }
   else {
     test= &handle;
@@ -71,7 +74,9 @@ void setup()
 
 void loop()
 {
-  delay(5000);
+  delay(10000);
+  Serial.println("loop");
+
   if (end == -1)
   {
     begin_time = millis();
@@ -94,5 +99,9 @@ void loop()
       Serial.println("good");
     }
     Serial.println("######################################################");
+  }
+  else if (!digitalRead(A1)){
+    end = -1;
+    Serial.println("reset du test");
   }
 }

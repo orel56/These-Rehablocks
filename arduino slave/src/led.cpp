@@ -35,8 +35,8 @@ Led::Led(int pin, int id)
 void Led::init_produced_subject()
 {
     this->produced_subject_nbr = 2;
-    this->producedSubjects[0] = new Subject(0b00000001);
-    this->producedSubjects[1] = new Subject(0b00001000);
+    this->producedSubjects[0] = new Subject(0);
+    this->producedSubjects[1] = new Subject(60);
 }
 
 Led::Led()
@@ -73,6 +73,7 @@ void Led::behaviour1()
         }
     }
     digitalWrite(this->pin, this->current_value);
+    Serial.println(this->current_value);
 }
 
 void Led::behaviour2()
@@ -110,7 +111,7 @@ void Led::produce_subjects()
 {
     for (int id = 0; id < this->produced_subject_nbr; id++)
     {
-        if ((this->producedSubjects[id])->id == 0b00001000)
+        if ((this->producedSubjects[id])->id == 60)
         {
             (this->producedSubjects[id])->old_value = this->previous_value;
             (this->producedSubjects[id])->value = this->current_value;
