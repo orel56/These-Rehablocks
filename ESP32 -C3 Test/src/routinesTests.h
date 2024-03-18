@@ -696,6 +696,7 @@ int test_bluetooth_function()
     my_nodes[1]->id = 1;
     my_nodes[1]->type = 1;
 
+    mydevice_number=2;
     //////// initialisation des sujets /////////////
 
     ////// sujet mouv /////
@@ -716,108 +717,101 @@ int test_bluetooth_function()
     my_nodes[0]->subjects[0] = my_subjects[1]; // sujet produit par le noeud led "led_status"
     my_nodes[0]->subjects[1] = my_subjects[0]; // sujet reçut par le noeud led "mouv"
     my_nodes[0]->sub_number = 2;
-
-    uint8_t bytes[4];
-
-    while (!digitalRead(A1))
+    while (1)
     {
+        uint8_t bytes[4];
         delay(500);
         for (int i = 0; i < mydevice_number; i++)
         {
-            if (i == 1)
+            // boucle pour les status
+            Serial.println(i);
+            out = send_command(my_nodes[i]->addr, "get_status");
+            delay(5);
+            if (!out)
             {
-                // boucle pour les status
-                out = send_command(my_nodes[i]->addr, "get_status");
-                delay(5);
-                if (!out)
+                // on réccupère les status de chaque noeuds
+
+                Serial.println("get_status was received checking if ACK is 1");
+                receive_data(my_nodes[i]->addr, buff, 7);
+                if (buff[0] == 1)
                 {
-                    // on réccupère les status de chaque noeuds
+                    /*  Serial.println("ACK is 1 after get_status");
+                     Serial.print("Node addr is : ");
+                     Serial.println(my_nodes[i]->addr);
 
-                    Serial.println("get_status was received checking if ACK is 1");
-                    receive_data(my_nodes[i]->addr, buff, 7);
-                    if (buff[0] == 1)
+                     Serial.print("Device status is : ");
+                     Serial.println(buff[1]);
+
+                     Serial.print("Subject produced is of id : ");
+                     Serial.println(buff[2]);
+
+                     Serial.print("Subject value is : "); */
+                    val = bytesArraytoInt(buff, 4, 3);
+                    // Serial.println(val);
+
+                    // on les stocks dans nos images des noeuds qu'on a en mémoire pour mettre à jour les valeurs
+                    for (int k = 0; k < my_sub_number; k++)
                     {
-                        /*  Serial.println("ACK is 1 after get_status");
-                         Serial.print("Node addr is : ");
-                         Serial.println(my_nodes[i]->addr);
-
-                         Serial.print("Device status is : ");
-                         Serial.println(buff[1]);
-
-                         Serial.print("Subject produced is of id : ");
-                         Serial.println(buff[2]);
-
-                         Serial.print("Subject value is : "); */
-                        val = bytesArraytoInt(buff, 4, 3);
-                        // Serial.println(val);
-
-                        // on les stocks dans nos images des noeuds qu'on a en mémoire pour mettre à jour les valeurs
-                        for (int k = 0; k < my_sub_number; k++)
+                        if (my_subjects[k]->id == buff[2])
                         {
-                            if (my_subjects[k]->id == buff[2])
-                            {
-                                Serial.println("Subject is saved");
-                                my_subjects[k]->value = val;
-                                Serial.print("For subject : ");
-                                Serial.println(my_subjects[k]->id);
-                                Serial.print("value is : ");
-                                Serial.println(my_subjects[k]->value);
-                                break;
-                            }
+                            Serial.println("Subject is saved");
+                            my_subjects[k]->value = val;
+                            Serial.print("For subject : ");
+                            Serial.println(my_subjects[k]->id);
+                            Serial.print("value is : ");
+                            Serial.println(my_subjects[k]->value);
+                            break;
                         }
-                    }
-                    else
-                    {
-                        Serial.println("ACK is 0 after get_status");
-                        return 0;
                     }
                 }
                 else
                 {
-                    Serial.print("get_status was not received by : ");
-                    Serial.println(my_nodes[i]->addr);
+                    Serial.println("ACK is 0 after get_status");
                     return 0;
                 }
+            }
+            else
+            {
+                Serial.print("get_status was not received by : ");
+                Serial.println(my_nodes[i]->addr);
+                return 0;
             }
         }
         for (int i = 0; i < mydevice_number; i++)
         {
-            if (i == 1)
+            Serial.println("publishing subjects..... ");
+            intToBytesArray(my_nodes[i]->subjects[1]->value, bytes);
+            /* for (int k=0;k<4;k++){
+                Serial.println(bytes[k]);
+            } */
+            Serial.print("id sent is : ");
+            Serial.println(my_nodes[i]->subjects[1]->id);
+            Serial.print("to node : ");
+            Serial.print(my_nodes[i]->addr);
+            out = send_command(my_nodes[i]->addr, "publish_subject", my_nodes[i]->subjects[1]->id, bytes);
+            delay(5);
+            if (!out)
             {
-                Serial.println("publishing subjects..... ");
-                intToBytesArray(my_nodes[i]->subjects[1]->value, bytes);
-                /* for (int k=0;k<4;k++){
-                    Serial.println(bytes[k]);
-                } */
-                Serial.print("id sent is : ");
-                Serial.println(my_nodes[i]->subjects[1]->id);
-                Serial.print("to node : ");
-                Serial.print(my_nodes[i]->addr);
-                out = send_command(my_nodes[i]->addr, "publish_subject", my_nodes[i]->subjects[1]->id, bytes);
-                delay(5);
-                if (!out)
+                Serial.println("publish subject was received checking if ACK is 1");
+                receive_data(my_nodes[i]->addr, buff, 1);
+
+                if (buff[0] == 1)
                 {
-                    Serial.println("publish subject was received checking if ACK is 1");
-                    receive_data(my_nodes[i]->addr, buff, 1);
-
-                    if (buff[0] == 1)
-                    {
-                        Serial.println("ACK is 1 after publish_subject");
-                    }
-                    else
-                    {
-                        Serial.println("ACK is 0 after publish subject");
-                        Serial.println(my_nodes[i]->addr);
-
-                        return 0;
-                    }
+                    Serial.println("ACK is 1 after publish_subject");
                 }
                 else
                 {
-                    Serial.print("publish subject was not received by : ");
+                    Serial.println("ACK is 0 after publish subject");
                     Serial.println(my_nodes[i]->addr);
+
                     return 0;
                 }
+            }
+            else
+            {
+                Serial.print("publish subject was not received by : ");
+                Serial.println(my_nodes[i]->addr);
+                return 0;
             }
         }
         check_ble(my_nodes, mydevice_number);

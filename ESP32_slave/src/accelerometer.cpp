@@ -33,6 +33,7 @@ void Accelerometer::setup(){
   mpu.setAccelerometerRange(MPU6050_RANGE_4_G);
   mpu.setGyroRange(MPU6050_RANGE_250_DEG);
   mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
+
 }
 
 void Accelerometer::behaviour1(){
@@ -63,6 +64,10 @@ void Accelerometer::behaviour1(){
   else {
     mouv=0;
   }
+char buf [100];
+  sprintf(buf, "Demo;%.3f;%.3f", rot_x, rot_y);
+  Serial.println(buf);
+
 }
 
 

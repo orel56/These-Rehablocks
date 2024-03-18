@@ -6,7 +6,6 @@
 
 volatile uint8_t *i2cSlaveAddrRegister = (volatile uint8_t *)0x3FF67010;
 
-
 Device::Device()
 {
   this->my_addr = EEPROM.read(0x00);
@@ -31,6 +30,7 @@ SlaveResponse Device::getResponse()
   {
     uint8_t bytes[4];
     intToBytesArray(this->id,bytes);
+    Serial.println("command is get info");
     response.buffer[1] = bytes[0];
     response.buffer[2] = bytes[1];
     response.buffer[3] = this->subscription;
@@ -72,42 +72,40 @@ uint8_t Device::expectedReceiveLength(uint8_t commandId)
 void Device::process()
 {
   this->command = this->pendingCommand[0];
-  Serial.println("processing");
   if (this->mode == 0)
   {
     if (command == 0x02)
     {
-      Serial.println("command is get_info");
       this->acknowledge = 1;
+      // Led is switched to off to inform user the device is connected
+      digitalWrite(USR_LED, LOW);
+      this->mode = 2;
 
-      this->connect_follow++;
     }
     else if (command == 0x01)
     {
-      Serial.println("command is change addr");
-      this->connect_follow++;
       this->acknowledge = 1;
       this->changeAddr(this->pendingCommand[1]);
     }
     else if (command == 0x00)
     {
-      Serial.println("command is ping and my addr is 0x08 meaning I 'am connecting");
       this->acknowledge = 1;
-      this->connect_follow++;
+      //ping was received during connexion process thus SAP is not needed 
+      Serial.println("I'am here");
+      digitalWrite(SAP, LOW);
+      pinMode(SAP,INPUT);
     }
   }
   else if (this->mode == 2)
   {
     if (command == 0x03)
     {
-      Serial.println("command is get_status");
 
       this->acknowledge = 1;
       this->get_status();
     }
     else if (command == 0x04) // publish subjects
     {
-      Serial.println("command is publish_subject");
 
       this->acknowledge = 1;
       this->acknowledge = this->grap_subject();
@@ -133,7 +131,7 @@ void Device::process()
     if (command == 0x00)
     {
       Serial.println("erasing addr");
-      EEPROM.write(0x00, 0x08);
+      this->changeAddr(0x08);
       digitalWrite(USR_LED, LOW);
       digitalWrite(SAP, LOW);
       pinMode(SAP,INPUT);
@@ -266,34 +264,19 @@ void Device::deconnect()
   this->mode = 1;
 }
 
-void Device::connect()
-{
-  if (this->connect_follow < 3)
-  {
-    this->tick();
-  }
-  else
-  {
-    Serial.println("changing usr led to low, after connect follow reached 3");
-    digitalWrite(USR_LED, LOW);
-    digitalWrite(SAP, LOW);
-    pinMode(SAP,INPUT);
-    this->tick();
-
-    this->mode = 2;
-  }
-}
-
-void Device::i2cRequest()
+void Device::i2cRequest(TwoWire * I2C)
 {
   // get the response (the this knows what to say)
   SlaveResponse resp = this->getResponse();
   // write it to the out buffer
-
-  Wire.write(resp.buffer, resp.size);
+  for (int k =0;k<resp.size;k++){
+    Serial.print("buffer value is : ");
+    Serial.println(resp.buffer[k]);
+  }
+  I2C->write(resp.buffer, resp.size);
 }
 
-void Device::i2cReceive(int bytes)
+void Device::i2cReceive(int bytes,TwoWire * I2C)
 {
   uint8_t msgLen = 0;
   // loop over each incoming byte
@@ -302,7 +285,7 @@ void Device::i2cReceive(int bytes)
   for (int i = 0; i < bytes; i++)
   {
     // stick that byte in our receive buffer
-    this->receivedBytes[this->receivedByteIdx] = Wire.read();
+    this->receivedBytes[this->receivedByteIdx] = I2C->read();
     // now, we're sure we have _at least_ one byte in the buffer
     if (!msgLen)
     {
@@ -338,14 +321,8 @@ void Device::i2cReceive(int bytes)
     }
   }
   Serial.println("On termine le process de i2cReceive");
-  if (this->mode == 0)
-  {
-    this->connect();
-  }
-  else if (this->mode == 2)
-  {
     this->tick();
-  }
+
 }
 
 void Device::behaviour1(){};

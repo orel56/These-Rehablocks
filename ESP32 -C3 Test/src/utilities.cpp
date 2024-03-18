@@ -131,12 +131,12 @@ void check_ble(device * nodes[10], uint8_t n){
             dataToSend=data_to_send(nodes,n);
             pCharacteristic->setValue(dataToSend);
             pCharacteristic->notify();
-            delay(500); // Adjust delay as needed
+            delay(50); // Adjust delay as needed
         }
 
         if (!deviceConnected && oldDeviceConnected)
         {
-            delay(500);
+            delay(50);
             pServer->startAdvertising();
             Serial.println("start advertising");
             oldDeviceConnected = deviceConnected;
@@ -197,7 +197,7 @@ std::string data_to_send(device *nodes[10], uint8_t n)
     data.append(DEV_NAME);
     data.append("\",\"Nodes\":\{");
 
-    char buff[100];
+    char buff[10];
     for (int i = 0; i < n; i++)
     {   data.append(" \"");
         sprintf(buff,"%d",i);
@@ -231,13 +231,6 @@ std::string data_to_send(device *nodes[10], uint8_t n)
     }
     data.pop_back();
     data.append("}}");
-    Serial.print(data.c_str()[215]);
-    Serial.print(data.c_str()[216]);
-    Serial.print(data.c_str()[217]);
-    Serial.print(data.c_str()[218]);
-    Serial.print(data.c_str()[219]);
-    Serial.print(data.c_str()[220]);
-    Serial.print(data.c_str()[221]);
 
     return data;
 }

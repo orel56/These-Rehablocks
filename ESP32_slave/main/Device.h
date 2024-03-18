@@ -3,7 +3,6 @@
 #include "Arduino.h"
 #include "config.h"
 #include "Subject.h"
-#include "Device.h"
 #include "config.h"
 #include <Wire.h>
 #include "EEPROM.h"
@@ -35,7 +34,6 @@ class Device {
     uint8_t my_addr;
 
     uint8_t mode = 0;
-    uint8_t connect_follow=1;
 
     Subject * producedSubjects[MAX_SUBJECT];
     int produced_subject_nbr=0;
@@ -64,11 +62,11 @@ class Device {
     /*
      *Method to get the request from wire.h library
     */
-    void i2cRequest();
+    void i2cRequest(TwoWire * I2C);
     /*
      *Method to get the receive from wire.h library
     */
-    void i2cReceive(int bytes);
+    void i2cReceive(int bytes,TwoWire * I2C);
 
     /*
      * process(BUFFER, BUFLEN)
@@ -78,7 +76,6 @@ class Device {
     void changeAddr(uint8_t addr);
 
     void deconnect();
-    void connect();
     void tick();
 //behaviour handling 
 

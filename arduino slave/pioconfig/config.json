@@ -1,12 +1,13 @@
+
 {
     "device" : {
-            "accelerometer" : {
-                "threshold" : 5,
-                "id" : 2
+            "led" : {
+                "pin!" : "A0",
+                "id" : 1
             },
         "info" : {
             "subscription" : {
-                "1" : "led_status"
+                "4" : "mouv"
             }
                     }
 

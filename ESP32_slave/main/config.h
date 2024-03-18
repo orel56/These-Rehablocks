@@ -6,7 +6,7 @@
 #define USR_LED 26
 #define SAP 12
 
-#define SDA2 14
-#define SCL2 27
+#define SDA2 18
+#define SCL2 5
 
 #define EEPROM_SIZE 12

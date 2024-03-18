@@ -1,5 +1,5 @@
 typecode_dictionnary = {
-                     "led" : '100000',
+                     "led" : '000011',
                      "buzzer" : '100001',
                      "potentiometer": '000000',
                      "accelerometer" : '000001',

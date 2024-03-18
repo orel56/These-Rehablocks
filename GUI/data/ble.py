@@ -164,19 +164,24 @@ class Connection:
         
     def data_formatting(self):
         if self.rx_data !={}: 
-            self.data_format["Master"]={"Nom":self.rx_data["Device"]}
+            self.data_format["Master"]=self.rx_data["Device"]
             for node in self.rx_data["Nodes"] : 
-                self.data_format[node]={"Nom":typecode_dictionnary[self.rx_data["Nodes"][node]["Type"]]+" "+str(self.rx_data["Nodes"][node]["id"])}
-                for subject in self.rx_data["Nodes"][node]["Produced_Subjects"] :
-                    self.data_format[node]["Sujets produits"]={subject_dictionnary[subject]:self.rx_data["Nodes"][node]["Produced_Subjects"][subject]}
-                for subject in self.rx_data["Nodes"][node]["Received_Subjects"] :
-                    self.data_format[node]["Sujets reçut"]={subject_dictionnary[subject]:self.rx_data["Nodes"][node]["Received_Subjects"][subject]}
+                self.data_format[node]={"Nom":typecode_dictionnary[self.rx_data["Nodes"][node]["type"]]+" "+str(self.rx_data["Nodes"][node]["id"])}
+                for subject in self.rx_data["Nodes"][node]["Produced subject"] :
+                    self.data_format[node]["Sujets produits"]={subject_dictionnary[subject]:self.rx_data["Nodes"][node]["Produced subject"][subject]}
+                for subject in self.rx_data["Nodes"][node]["Received subject"] :
+                    self.data_format[node]["Sujets recut"]={subject_dictionnary[subject]:self.rx_data["Nodes"][node]["Received subject"][subject]}
         else : 
             self.data_format={}
             
     def request(self) : 
         self.data_formatting()
-        return json.loads(self.data_emulate)
+        print(self.data_format)
+
+        if self.data_format!={} : 
+            return self.data_format
+        else : 
+            return {"Master" :"No nodes connected"}
         
 
 #############

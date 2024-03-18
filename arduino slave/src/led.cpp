@@ -73,6 +73,7 @@ void Led::behaviour1()
         }
     }
     digitalWrite(this->pin, this->current_value);
+    Serial.println(this->current_value);
 }
 
 void Led::behaviour2()

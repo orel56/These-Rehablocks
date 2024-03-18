@@ -7,30 +7,34 @@
 uint8_t val = 0;
 uint8_t sap = 0;
 
+TwoWire I2C2 = TwoWire(1);
+
 void i2cRequestEvent()
 {
-  I2CDevice->i2cRequest();
+  I2CDevice->i2cRequest(&I2C2);
 }
 
 void i2cReceiveEvent(int bytesReceived)
 {
 
-  I2CDevice->i2cReceive(bytesReceived);
+  I2CDevice->i2cReceive(bytesReceived,&I2C2);
 }
 
-TwoWire I2C2 = TwoWire(1);
- 
+
 void setup()
 {
   // SETUP wire
+  delay(2000);
   pinMode(USR_LED, OUTPUT);
   pinMode(USR_BTN, INPUT_PULLUP);
   pinMode(SAP,INPUT);
   EEPROM.begin(EEPROM_SIZE);
-  Serial.begin(9600);
+  Serial.begin(115200);
   I2CDevice->setup();
   byte i2c_addr;
   i2c_addr = EEPROM.read(0x00);
+  Serial.print("my addr is :");
+  Serial.println(i2c_addr);
   I2C2.begin(i2c_addr,SDA2,SCL2,100000UL);
   I2C2.onReceive(i2cReceiveEvent);
   I2C2.onRequest(i2cRequestEvent);
@@ -41,12 +45,14 @@ void setup()
   {
     I2CDevice->mode = 0;
     digitalWrite(USR_LED, HIGH);
+    Serial.println("mode is 0 because i2c_addr is 8");
 
   }
   else
   {
     I2CDevice->mode = 2;
     digitalWrite(USR_LED, LOW);
+    Serial.println("mode is 2 because i2c_addr is not 8");
 
   }
 }
@@ -59,9 +65,8 @@ void setup()
  */
 void loop()
 {
-  delay(1000);
+  delay(500);
   I2CDevice->behav();
-  
   bool btn_val = !digitalRead(USR_BTN);
   if (I2CDevice->mode == 0)
   {  
@@ -78,6 +83,7 @@ void loop()
   {  
     if (btn_val)
     {
+      I2CDevice->changeAddr(8);
       I2CDevice->deconnect();
     }
   }
