@@ -10,6 +10,16 @@ void intToBytesArray(int value, uint8_t bytes[4])
 
 }
 
+void longlongToBytesArray(int value, uint8_t bytes[8])
+{
+    
+    for (int i = 0; i < 8; i++)
+    {
+        bytes[i] = (value & (0xff << ( i * 8))) >> 8*i;
+    } 
+
+}
+
 int bytesArraytoInt(volatile uint8_t *data, uint8_t len, uint8_t begin_val)
 {
     int value = 0;

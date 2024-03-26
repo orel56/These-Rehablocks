@@ -12,12 +12,12 @@ Device::Device()
 
 #ifdef INFO
   this->subscription = INFO_SUBSCRIPTION;
+  this->production = INFO_PRODUCTION;
 #endif
 #ifndef INFO_BEHAVIOUR
   this->update_behav();
 #else
   this->update_behav(INFO_BEHAVIOUR);
-
 #endif
   this->init_received_subject();
 };
@@ -29,12 +29,32 @@ SlaveResponse Device::getResponse()
   if (command == 2)
   {
     uint8_t bytes[4];
+    uint8_t bytes2[8];
+
     intToBytesArray(this->id,bytes);
     response.buffer[1] = bytes[0];
     response.buffer[2] = bytes[1];
-    response.buffer[3] = this->subscription;
-    response.buffer[4] = this->current_behaviour;
-    response.size = 5;
+    longlongToBytesArray(this->subscription,bytes2);
+    response.buffer[3] = bytes2[0];
+    response.buffer[4] = bytes2[1];
+    response.buffer[5] = bytes2[2];
+    response.buffer[6] = bytes2[3];
+    response.buffer[7] = bytes2[4];
+    response.buffer[8] = bytes2[5];
+    response.buffer[9] = bytes2[6];
+    response.buffer[10] = bytes2[7];
+    longlongToBytesArray(this->production,bytes2);
+    response.buffer[11] = bytes2[0];
+    response.buffer[12] = bytes2[1];
+    response.buffer[13] = bytes2[2];
+    response.buffer[14] = bytes2[3];
+    response.buffer[15] = bytes2[4];
+    response.buffer[16] = bytes2[5];
+    response.buffer[17] = bytes2[6];
+    response.buffer[18] = bytes2[7];
+
+    response.buffer[19] = this->current_behaviour;
+    response.size = 20;
   }
   else if (command == 3)
   {

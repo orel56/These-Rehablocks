@@ -181,7 +181,7 @@ class Connection:
         if self.data_format!={} : 
             return self.data_format
         else : 
-            return {"Master" :"No nodes connected"}
+            return json.loads(self.data_emulate)
         
 
 #############

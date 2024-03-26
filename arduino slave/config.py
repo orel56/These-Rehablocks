@@ -1,4 +1,6 @@
-typecode_dictionnary = {
+
+##################################OLD##########################
+typecode_dictionnary = {                                      #
                      "led" : '000011',
                      "buzzer" : '100001',
                      "potentiometer": '000000',
@@ -13,11 +15,20 @@ familly_dictionnary = {
                      "joystick": '001',
                      "ultrason": '001'}
 
+################################# OLD #########################
+
+config_nodes = {"led": {"type" :'000011', "fam" : '000', "produced_subject" : '60'}, 
+                "accelerometer": {"type" :'000001',"fam" : '001',"produced_subject":'65051'},
+                 "ultrason" :  {"type" :'001000',"fam" : '001',"produced_subject": '35'},
+                 "buzzer" :  {"type" :'100001',"fam" : '000',"produced_subject":'61'},
+                 "joystick":  {"type" :'000010',"fam" : '001',"produced_subject": '4'}}
+
 subject_dictionnary = {"mouv":'1',
                        "angle_x":"2",
                        "angle_y":"3",
                        "potar_value":"16",
                        "led_status":"60",
+                       "buzz_status" : "61",
                        "obstacle" : "35",                       
                        "direction" : "4"
                        }

@@ -18,6 +18,7 @@ class Device {
     int time = 0;
     uint16_t id=0;
     long long subscription=0;
+    long long production=0;
     int current_value =0;
     int previous_value =0;
     uint8_t acknowledge=0; // acknowledge byte value

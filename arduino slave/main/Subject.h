@@ -27,3 +27,5 @@ float bytesArraytoFloat(volatile uint8_t* data,uint8_t len,uint8_t begin_val);
 
 void charToBytesArray(char value,uint8_t bytes[4]);
 char bytesArraytoChar(volatile uint8_t* data,uint8_t len,uint8_t begin_val);
+
+void longlongToBytesArray(int value,uint8_t bytes[8]);

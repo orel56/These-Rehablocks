@@ -2,7 +2,7 @@
 import os
 import glob
 import json
-import dic
+import config as conf
 id=''
 
 
@@ -87,32 +87,35 @@ for config in configs:
                                 subscrip = ""
                                 print(len(config['device']["info"]))
                                 for sub_key in config['device']["info"]["subscription"] :
-                                    sub=config['device']["info"]["subscription"][sub_key]
-                                    
-                                    print(sub)
-                                    subscrip+=bin(int(dic.subject_dictionnary[sub]))[2:].zfill(8)
-                                    print(subscrip)
+                                    sub=config['device']["info"]["subscription"][sub_key]                                    
+                                    subscrip+=bin(int(conf.subject_dictionnary[sub]))[2:].zfill(8)
                                 flags += "    ; From %s\n" % device
                                 flags += appendFlags(config['device'][device], device, int(subscrip,2))
 
 
                                 # print(flags).
                     else : 
-
+                        
                         if not os.path.exists('src/%s.cpp' % device):
                             print('! Module not found: %s' % device)
                             exit(1)
                         srcs += "    +<%s.cpp>\n" % device
 
-                        id=id+dic.typecode_dictionnary[device] + dic.familly_dictionnary[device] + "000"
+                        print(device)
+                        
+                        id=id+conf.config_nodes[device]["type"] + conf.config_nodes[device]["fam"]+ "000"
                         if (config['device'][device]["id"]) : 
                             id='0b'+id+to_four_bits(config['device'][device]["id"])
                             config['device'][device]["id"]=int(id,2)
 
                         flags += "    ; From %s\n" % device
                         flags += appendFlags(config['device'][device], device)
+                        flags += "    -D%s=%s\n" % (("info"+'_'+"production").upper(), int(conf.config_nodes[device]["produced_subject"]))
+                        flags += "    \n"
                         # print(flags)
 
+                        
+                        
             ini = ini_template % (config_name, srcs, flags)
             ini_filename = 'pioconfig/platformio_ini/%s.ini' % config_name
 
