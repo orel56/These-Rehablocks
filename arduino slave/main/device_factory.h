@@ -19,4 +19,7 @@
 #elif ULTRASON
     #include "ultrason.h"
     ultrason* I2CDevice = new ultrason(ULTRASON_PINTRIG,ULTRASON_PINECHO,ULTRASON_THRESHOLD,ULTRASON_ID);
+#elif BUTTON
+    #include "button.h"
+    Button* I2CDevice = new Button(BUTTON_PIN,BUTTON_ID);
 #endif
